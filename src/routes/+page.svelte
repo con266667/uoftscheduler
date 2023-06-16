@@ -228,7 +228,7 @@
     width: 100%;
     text-align: left;
     margin-left: 5pt;
-    margin-top: 25pt;
+    margin-top: 50pt;
     margin-bottom: 0;
     font-size: 1rem;
     font-weight: 700;
@@ -240,7 +240,7 @@
     flex-direction: row;
     align-items: center;
     justify-content: space-evenly;
-    margin-top: 10pt;
+    margin-top: 15pt;
     gap: 15pt;
     width: 100%;
   }

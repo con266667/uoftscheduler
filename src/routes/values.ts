@@ -6,7 +6,7 @@ export const Sessions = {
     Fall2023: {
         displayName: "Fall 2023",
         id: "20239",
-        style: "background: linear-gradient(45deg, #FFCE95 0%, #F7CCAC 100%);"
+        style: "background: linear-gradient(45deg, #E8902a 0%, #EDAD4C 100%);"
     },
     Winter2024: {
         displayName: "Winter 2024",
