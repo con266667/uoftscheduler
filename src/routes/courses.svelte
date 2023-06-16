@@ -46,6 +46,10 @@
         if (viewingCourses && courses.length == 0) {
             getCourses();
         }
+
+        if (!viewingCourses) {
+            courses = [];
+        }
     }
 
     $: console.log(courses);
