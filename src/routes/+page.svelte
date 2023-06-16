@@ -2,45 +2,50 @@
   import { onMount } from "svelte";
   import { Division, Sessions } from "./values";
   import Courses from "./courses.svelte";
-    import { writable } from "svelte/store";
+  import { writable } from "svelte/store";
+  import Timetable from "./timetable.svelte";
 
   let selectedSession: typeof Sessions.Fall2023 = Sessions.Fall2023;
   let divisions: any[] = [];
   let course_levels: any[] = [];
   let can_search = false;
   let viewingCourses = false;
+  let viewingTimetable = false;
 
   const divisionLabel: Record<string, string> = {
-    'Faculty of Applied Science & Engineering': 'Engineering',
-    'Faculty of Arts and Science': 'Arts & Science',
-    'Faculty of Music': 'Music',
-    'Faculty of Kinesiology and Physical Education': 'Kinesiology',
-    'John H. Daniels Faculty of Architecture, Landscape, & Design': 'Architecture',
-    'University of Toronto Mississauga': 'UTM',
-    'University of Toronto Scarborough': 'UTSC',
-  }
+    "Faculty of Applied Science & Engineering": "Engineering",
+    "Faculty of Arts and Science": "Arts & Science",
+    "Faculty of Music": "Music",
+    "Faculty of Kinesiology and Physical Education": "Kinesiology",
+    "John H. Daniels Faculty of Architecture, Landscape, & Design":
+      "Architecture",
+    "University of Toronto Mississauga": "UTM",
+    "University of Toronto Scarborough": "UTSC",
+  };
 
   let optimizations = [
     "Late Start",
     "Early Finish",
     "Fewer Days",
     "Fewer Gaps",
-  ]
+  ];
 
   let optimizationImages: Record<string, string> = {
     "Late Start": "/late-start.png",
     "Early Finish": "/early-finish.png",
     "Fewer Days": "/fewer-days.png",
     "Fewer Gaps": "/fewer-gaps.png",
-  }
+  };
 
-  let selectedCourses = writable<string[]>([]);
+  let selectedCourses = writable<any[]>([]);
 
   let selectedOptimizations: string[] = [];
 
   function optimizationClicked(optimization: string) {
     if (selectedOptimizations.includes(optimization)) {
-      selectedOptimizations = selectedOptimizations.filter((opt) => opt != optimization);
+      selectedOptimizations = selectedOptimizations.filter(
+        (opt) => opt != optimization
+      );
     } else {
       selectedOptimizations.push(optimization);
       selectedOptimizations = [...selectedOptimizations];
@@ -48,7 +53,9 @@
   }
 
   $: {
-    can_search = divisions.some((e)=>e.selected) && course_levels.some((e)=>e.selected);
+    can_search =
+      divisions.some((e) => e.selected) &&
+      course_levels.some((e) => e.selected);
   }
 
   async function getData() {
@@ -68,20 +75,24 @@
 
     window.addEventListener("popstate", () => {
       viewingCourses = false;
-    });
-
-    window.addEventListener("pushstate", () => {
-      viewingCourses = true;
+      viewingTimetable = false;
     });
   });
 </script>
 
-<div class="main" class:searching={viewingCourses}>
+<div class="main" class:searching={viewingCourses || viewingTimetable}>
   <h1>UofT Planner</h1>
   <div class="sessions">
     {#each Object.values(Sessions) as session}
       <!-- svelte-ignore a11y-click-events-have-key-events -->
-      <div class="session" class:selected={selectedSession==session} style={session.style} on:click={()=>selectedSession=session}>{session.displayName}</div>
+      <div
+        class="session"
+        class:selected={selectedSession == session}
+        style={session.style}
+        on:click={() => (selectedSession = session)}
+      >
+        {session.displayName}
+      </div>
     {/each}
   </div>
   <h2 class="subtitle">Choose Courses</h2>
@@ -89,46 +100,89 @@
     <div class="courses">
       {#each $selectedCourses as course}
         <div class="course">
-          <h2>{course}</h2> <button on:click={()=>selectedCourses.update((courses)=>courses.filter((c)=>c!=course))}>✕</button>
+          <h2>{course.code}</h2>
+          <button
+            on:click={() =>
+              selectedCourses.update((courses) =>
+                courses.filter((c) => c != course)
+              )}>✕</button
+          >
         </div>
       {/each}
-      <div class="x-space"></div>
+      <div class="x-space" />
     </div>
   {/if}
   <div class="divisions">
     {#each divisions as division (division.value)}
       <!-- svelte-ignore a11y-click-events-have-key-events -->
-      <button class="division" on:click={()=>{division.selected=!division.selected; console.log(division.selected)}} class:selected={division.selected}>
-        <h2>{divisionLabel[division.label]??division.label}</h2>
+      <button
+        class="division"
+        on:click={() => {
+          division.selected = !division.selected;
+          console.log(division.selected);
+        }}
+        class:selected={division.selected}
+      >
+        <h2>{divisionLabel[division.label] ?? division.label}</h2>
       </button>
     {/each}
   </div>
   <div class="course-levels">
     {#each course_levels as course_level}
       <!-- svelte-ignore a11y-click-events-have-key-events -->
-      <div class="course-level" on:click={()=>course_level.selected=!course_level.selected} class:selected={course_level.selected}>
+      <div
+        class="course-level"
+        on:click={() => (course_level.selected = !course_level.selected)}
+        class:selected={course_level.selected}
+      >
         <h2>{course_level.label}</h2>
       </div>
     {/each}
   </div>
   <!-- svelte-ignore a11y-click-events-have-key-events -->
-  <button disabled={!can_search} class="create" class:selected={can_search} on:click={viewCourses}>RESULTS</button>
-  <pre style="margin-top: 10pt;"></pre>
+  <button
+    disabled={!can_search}
+    class="create"
+    class:selected={can_search}
+    on:click={viewCourses}>RESULTS</button
+  >
+  <pre style="margin-top: 10pt;" />
   <h2 class="subtitle">Optimize</h2>
   <div class="optimizations">
     {#each optimizations as optimization}
       <!-- svelte-ignore a11y-click-events-have-key-events -->
-      <div class="optimization" class:selected={selectedOptimizations.includes(optimization)} on:click={()=>optimizationClicked(optimization)}>
+      <div
+        class="optimization"
+        class:selected={selectedOptimizations.includes(optimization)}
+        on:click={() => optimizationClicked(optimization)}
+      >
         <img src={optimizationImages[optimization]} alt={optimization} />
         <h2>{optimization}</h2>
       </div>
     {/each}
   </div>
-  <div class="create">CREATE</div>
+  <button
+    class="create"
+    disabled={!($selectedCourses.length > 0)}
+    on:click={() => (viewingTimetable = true)}
+    class:selected={$selectedCourses.length > 0}
+  >
+    CREATE
+  </button>
 </div>
 
-<div class="courses-page" class:enabled={viewingCourses}>
-  <Courses viewingCourses={viewingCourses} selectedCourses={selectedCourses} selectedSession={selectedSession.id} divisonIds={divisions.filter((d)=>d.selected).map((d)=>d.value)} courseLevels={course_levels.filter((c)=>c.selected).map((c)=>c.value)} />
+<div class="page" class:enabled={viewingCourses && !viewingTimetable}>
+  <Courses
+    {viewingCourses}
+    {selectedCourses}
+    selectedSession={selectedSession.id}
+    divisonIds={divisions.filter((d) => d.selected).map((d) => d.value)}
+    courseLevels={course_levels.filter((c) => c.selected).map((c) => c.value)}
+  />
+</div>
+
+<div class="page" class:enabled={viewingTimetable}>
+  <Timetable {viewingTimetable} {selectedCourses} />
 </div>
 
 <style>
@@ -140,16 +194,23 @@
     padding: 1rem;
   }
 
-  .courses-page {
+  .main.searching {
+    height: 100vh;
+    overflow: hidden;
+    display: none;
+  }
+
+  .page {
     display: none;
     position: absolute;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
+    width: 100vw;
+    height: 100vh;
+    z-index: 200;
   }
 
-  .courses-page.enabled {
+  .enabled {
     display: block;
   }
 
@@ -204,7 +265,9 @@
     box-shadow: 0 0 30px 5px rgba(0, 0, 0, 0.1);
   }
 
-  .courses, .divisions, .course-levels {
+  .courses,
+  .divisions,
+  .course-levels {
     overflow-x: scroll;
     display: flex;
     flex-direction: row;
@@ -212,7 +275,7 @@
     justify-content: start;
     margin-top: 8pt;
     gap: 15pt;
-    width: 100vw; 
+    width: 100vw;
   }
 
   .courses {
@@ -227,11 +290,15 @@
     margin-top: 10pt;
   }
 
-  .courses::-webkit-scrollbar, .divisions::-webkit-scrollbar, .course-levels::-webkit-scrollbar {
+  .courses::-webkit-scrollbar,
+  .divisions::-webkit-scrollbar,
+  .course-levels::-webkit-scrollbar {
     display: none;
   }
 
-  .course:first-of-type, .division:first-of-type, .course-level:first-of-type {
+  .course:first-of-type,
+  .division:first-of-type,
+  .course-level:first-of-type {
     margin-left: 20pt;
   }
 
@@ -241,7 +308,9 @@
     border-radius: 8pt;
   }
 
-  .courses h2, .division h2, .course-level h2 {
+  .courses h2,
+  .division h2,
+  .course-level h2 {
     font-size: 0.8rem;
     font-weight: 700;
     padding: 0;
@@ -253,7 +322,9 @@
     margin-right: 5pt;
   }
 
-  .course, .division, .course-level {
+  .course,
+  .division,
+  .course-level {
     display: flex;
     flex-direction: row;
     gap: 1rem;
@@ -270,12 +341,14 @@
     flex-shrink: 0;
   }
 
-  .division, .course-level {
+  .division,
+  .course-level {
     opacity: 0.2;
     scale: 0.9;
   }
 
-  .division.selected, .course-level.selected {
+  .division.selected,
+  .course-level.selected {
     opacity: 1;
     scale: 1;
   }

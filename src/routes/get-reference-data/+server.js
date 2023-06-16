@@ -1,4 +1,4 @@
-import { browser } from '$app/environment';
+import { dev } from '$app/environment';
 import { error } from '@sveltejs/kit';
 
 export async function GET({ url }) {
@@ -8,9 +8,9 @@ export async function GET({ url }) {
         },
     };
 
-    // if (browser) {
-    //     return new Response(JSON.stringify(test_data), init);
-    // }
+    if (dev) {
+        return new Response(JSON.stringify(test_data), init);
+    }
 
     var myHeaders = new Headers();
     myHeaders.append("Accept", "application/json, text/plain, */*");
