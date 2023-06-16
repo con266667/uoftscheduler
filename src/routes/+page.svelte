@@ -2,6 +2,8 @@
   import { onMount } from "svelte";
   import { Division, Session } from "./values";
 
+  let courses: any[] = [];
+
   async function getCourses() {
     let res = await fetch("https://get-courses.cnwilson29.workers.dev", {
       method: "POST",
@@ -35,7 +37,19 @@
   }
 
   onMount(async () => {
-    let courses = await getCourses();
-    console.log(courses);
+    let _courses = await getCourses();
+    courses = _courses.payload.pageableCourses;
   });
 </script>
+
+
+<h1>UofT Scheduler</h1>
+
+<div>
+  <h2>Course List</h2>
+  <ul>
+    {#each courses as course}
+      <li>{course.name}</li>
+    {/each}
+  </ul>
+</div>
