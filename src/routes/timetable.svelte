@@ -1,5 +1,13 @@
 <script lang="ts">
   import type { Writable } from "svelte/store";
+  import {
+    schedule,
+    type Course,
+    type Event,
+    daysOffOptimizer,
+    type Schedule,
+    averageStartTimeOptimizer,
+  } from "./schedule";
 
   export let viewingTimetable: boolean;
   export let selectedCourses: Writable<any[]>;
@@ -35,6 +43,7 @@
       for (let meetingTime of section.meetingTimes) {
         times.push({
           course: course,
+          section: section.name,
           day: meetingTime.start.day,
           startTime: meetingTime.start.millisofday,
           endTime: meetingTime.end.millisofday,
@@ -44,10 +53,52 @@
     return times;
   }
 
+  function callScheduler() {
+    let scheduleCourses: Course[] = [];
+    for (let course of $selectedCourses) {
+      let sections: {
+        id: string;
+        events: Event[];
+      }[] = [];
+      for (let section of course.sections) {
+        if (!section.name.includes("LEC")) {
+          continue;
+        }
+        let events: Event[] = [];
+        for (let meetingTime of section.meetingTimes) {
+          events.push({
+            day: meetingTime.start.day,
+            startTime: meetingTime.start.millisofday,
+            endTime: meetingTime.end.millisofday,
+          });
+        }
+        sections.push({
+          id: section.name,
+          events: events,
+        });
+      }
+      scheduleCourses.push({
+        code: course.code,
+        sections: sections,
+      });
+    }
+
+    let newSchedule: Schedule = schedule(
+      scheduleCourses,
+      averageStartTimeOptimizer
+    );
+
+    timetable = timetable.filter(
+      (e) => e.section == newSchedule.get(e.course.code)
+    );
+  }
+
   function buildTimetable() {
+    timetable = [];
     for (let course of $selectedCourses) {
       let events = getTimes(course);
       timetable = [...timetable, ...events];
+      callScheduler();
     }
   }
 
@@ -56,14 +107,6 @@
       buildTimetable();
     }
   }
-
-  $: console.log(
-    timetable
-      .filter((e) => e.day == currentDay + 1)
-      .filter((e) => startMillisToIndex(e) == 10)
-  );
-
-  $: console.log(timetable.filter((e) => e.day == currentDay + 1));
 </script>
 
 <div class="main">

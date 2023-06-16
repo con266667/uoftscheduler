@@ -119,7 +119,6 @@
         class="division"
         on:click={() => {
           division.selected = !division.selected;
-          console.log(division.selected);
         }}
         class:selected={division.selected}
       >
