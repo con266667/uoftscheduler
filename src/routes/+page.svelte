@@ -18,6 +18,13 @@
     "Fewer Gaps": "/fewer-gaps.png",
   }
 
+  let selectedCourses = [
+    "AER210",
+    "ESC203",
+    "MAT292",
+    "CSC258",
+  ]
+
   let selectedOptimizations: string[] = [];
 
   function optimizationClicked(optimization: string) {
@@ -62,6 +69,16 @@
     });
     return await res.json();
   }
+
+  async function getData() {
+    let res = await fetch("/get-reference-data");
+    return await res.json();
+  }
+
+  onMount(async () => {
+    let data = await getData();
+    console.log(data);
+  });
 </script>
 
 
@@ -73,10 +90,16 @@
       <div class="session" class:selected={selectedSession==session} style={session.style} on:click={()=>selectedSession=session}>{session.displayName}</div>
     {/each}
   </div>
+  <h2 class="subtitle">Choose Courses</h2>
   <div class="courses">
-    <h2>Select Courses</h2>
-    <p>6 Courses Selected</p>
+    {#each selectedCourses as course}
+      <div class="course">
+        <h2>{course}</h2>
+      </div>
+    {/each}
+    <div class="x-space"></div>
   </div>
+  <div class="faculties"></div>
   <div class="optimizations">
     {#each optimizations as optimization}
       <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -96,6 +119,17 @@
     align-items: center;
     justify-content: start;
     padding: 1rem;
+  }
+
+  .subtitle {
+    width: 100%;
+    text-align: left;
+    margin-left: 5pt;
+    margin-top: 25pt;
+    margin-bottom: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #777;
   }
 
   .sessions {
@@ -131,34 +165,48 @@
   }
 
   .courses {
-    opacity: 0.2;
+    overflow-x: scroll;
     display: flex;
-    flex-direction: column;
-    align-items: start;
-    justify-content: center;
+    flex-direction: row;
+    align-items: center;
+    justify-content: start;
+    margin-top: 8pt;
+    gap: 15pt;
+    width: 100vw; 
+  }
+
+  .courses::-webkit-scrollbar {
+    display: none;
+  }
+
+  .course:first-of-type {
+    margin-left: 20pt;
+  }
+
+  .x-space {
+    width: 20pt;
+    height: 10px;
     background: white;
-    gap: 1pt;
-    width: 100%;
     border-radius: 8pt;
-    margin-top: 15pt;
-    padding-top: 0.6rem;
-    padding-bottom: 0.6rem;
   }
 
   .courses h2 {
     font-size: 0.8rem;
     font-weight: 700;
     padding: 0;
-    padding-left: 1rem;
     margin: 0;
   }
 
-  .courses p {
-    font-size: 0.6rem;
-    font-weight: 500;
-    padding: 0;
-    padding-left: 1rem;
-    margin: 0;
+  .course {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background: white;
+    border-radius: 8pt;
+    padding: 1rem;
+    transition: all 0.2s ease-in-out;
   }
 
   .optimizations {
