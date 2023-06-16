@@ -5,6 +5,7 @@
   let selectedSession: typeof Sessions.Fall2023 = Sessions.Fall2023;
   let divisions: any[] = [];
   let course_levels: any[] = [];
+  let can_search = false;
 
   const divisionLabel: Record<string, string> = {
     'Faculty of Applied Science & Engineering': 'Engineering',
@@ -46,6 +47,10 @@
       selectedOptimizations.push(optimization);
       selectedOptimizations = [...selectedOptimizations];
     }
+  }
+
+  $: {
+    can_search = divisions.some((e)=>e.selected) && course_levels.some((e)=>e.selected);
   }
 
   async function getCourses() {
@@ -125,6 +130,8 @@
       </div>
     {/each}
   </div>
+  <div class="create" class:selected={can_search}>RESULTS</div>
+  <pre style="margin-top: 10pt;"></pre>
   <h2 class="subtitle">Optimize</h2>
   <div class="optimizations">
     {#each optimizations as optimization}
@@ -320,5 +327,11 @@
     border-radius: 8pt;
     transition: all 0.2s ease-in-out;
     margin-top: 15pt;
+    opacity: 0.5;
+    transition: all 0.2s ease-in-out;
+  }
+
+  .create.selected {
+    opacity: 1;
   }
 </style>
