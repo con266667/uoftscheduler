@@ -39,7 +39,7 @@
   onMount(async () => {
     let _courses = await getCourses();
     console.log(_courses);
-    courses = _courses.payload.pageableCourses;
+    courses = _courses.payload.pageableCourses.courses;
     // fetch("/get-courses").then(async (res) => {
     //   console.log(res);
     //   let _courses = await res.json();
