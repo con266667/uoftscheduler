@@ -3,6 +3,18 @@
   import { Division, Sessions } from "./values";
 
   let selectedSession: typeof Sessions.Fall2023 = Sessions.Fall2023;
+  let divisions: any[] = [];
+  let course_levels: any[] = [];
+
+  const divisionLabel: Record<string, string> = {
+    'Faculty of Applied Science & Engineering': 'Engineering',
+    'Faculty of Arts and Science': 'Arts & Science',
+    'Faculty of Music': 'Music',
+    'Faculty of Kinesiology and Physical Education': 'Kinesiology',
+    'John H. Daniels Faculty of Architecture, Landscape, & Design': 'Architecture',
+    'University of Toronto Mississauga': 'UTM',
+    'University of Toronto Scarborough': 'UTSC',
+  }
 
   let optimizations = [
     "Late Start",
@@ -28,14 +40,12 @@
   let selectedOptimizations: string[] = [];
 
   function optimizationClicked(optimization: string) {
-    console.log(optimization);
     if (selectedOptimizations.includes(optimization)) {
       selectedOptimizations = selectedOptimizations.filter((opt) => opt != optimization);
     } else {
       selectedOptimizations.push(optimization);
       selectedOptimizations = [...selectedOptimizations];
     }
-    console.log(selectedOptimizations);
   }
 
   async function getCourses() {
@@ -77,10 +87,10 @@
 
   onMount(async () => {
     let data = await getData();
-    console.log(data);
+    divisions = data.payload.divisions;
+    course_levels = data.payload.courseLevels;
   });
 </script>
-
 
 <div class="main">
   <h1>UofT Planner</h1>
@@ -94,12 +104,28 @@
   <div class="courses">
     {#each selectedCourses as course}
       <div class="course">
-        <h2>{course}</h2>
+        <h2>{course}</h2> ✕
       </div>
     {/each}
     <div class="x-space"></div>
   </div>
-  <div class="faculties"></div>
+  <div class="divisions">
+    {#each divisions as division}
+      <div class="division" class:selected={division.selected}>
+        <!-- svelte-ignore a11y-click-events-have-key-events -->
+        <h2 on:click={()=>division.selected=!division.selected}>{divisionLabel[division.label]??division.label}</h2>
+      </div>
+    {/each}
+  </div>
+  <div class="course-levels">
+    {#each course_levels as course_level}
+      <div class="course-level" class:selected={course_level.selected}>
+        <!-- svelte-ignore a11y-click-events-have-key-events -->
+        <h2 on:click={()=>course_level.selected=!course_level.selected}>{course_level.label}</h2>
+      </div>
+    {/each}
+  </div>
+  <h2 class="subtitle">Optimize</h2>
   <div class="optimizations">
     {#each optimizations as optimization}
       <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -164,7 +190,7 @@
     box-shadow: 0 0 30px 5px rgba(0, 0, 0, 0.1);
   }
 
-  .courses {
+  .courses, .divisions, .course-levels {
     overflow-x: scroll;
     display: flex;
     flex-direction: row;
@@ -175,31 +201,44 @@
     width: 100vw; 
   }
 
-  .courses::-webkit-scrollbar {
+  .divisions {
+    margin-top: 15pt;
+  }
+
+  .course-levels {
+    margin-top: 10pt;
+  }
+
+  .courses::-webkit-scrollbar, .divisions::-webkit-scrollbar, .course-levels::-webkit-scrollbar {
     display: none;
   }
 
-  .course:first-of-type {
+  .course:first-of-type, .division:first-of-type, .course-level:first-of-type {
     margin-left: 20pt;
   }
 
   .x-space {
     width: 20pt;
     height: 10px;
-    background: white;
     border-radius: 8pt;
   }
 
-  .courses h2 {
+  .courses h2, .division h2, .course-level h2 {
     font-size: 0.8rem;
     font-weight: 700;
     padding: 0;
     margin: 0;
+    margin-top: 2pt;
   }
 
-  .course {
+  .courses h2 {
+    margin-right: 5pt;
+  }
+
+  .course, .division, .course-level {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    gap: 1rem;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
@@ -209,13 +248,25 @@
     transition: all 0.2s ease-in-out;
   }
 
+  .division {
+    flex-shrink: 0;
+  }
+
+  .division, .course-level {
+    opacity: 0.2;
+  }
+
+  .division.selected, .course-level.selected {
+    opacity: 1;
+  }
+
   .optimizations {
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-template-rows: 1fr 1fr;
     gap: 15pt;
     width: 100%;
-    margin-top: 15pt;
+    margin-top: 8pt;
   }
 
   .optimization {
