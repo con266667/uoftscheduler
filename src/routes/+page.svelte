@@ -115,18 +115,18 @@
     <div class="x-space"></div>
   </div>
   <div class="divisions">
-    {#each divisions as division}
-      <div class="division" class:selected={division.selected}>
-        <!-- svelte-ignore a11y-click-events-have-key-events -->
-        <h2 on:click={()=>division.selected=!division.selected}>{divisionLabel[division.label]??division.label}</h2>
-      </div>
+    {#each divisions as division (division.value)}
+      <!-- svelte-ignore a11y-click-events-have-key-events -->
+      <button class="division" on:click={()=>{division.selected=!division.selected; console.log(division.selected)}} class:selected={division.selected}>
+        <h2>{divisionLabel[division.label]??division.label}</h2>
+      </button>
     {/each}
   </div>
   <div class="course-levels">
     {#each course_levels as course_level}
-      <div class="course-level" class:selected={course_level.selected}>
-        <!-- svelte-ignore a11y-click-events-have-key-events -->
-        <h2 on:click={()=>course_level.selected=!course_level.selected}>{course_level.label}</h2>
+      <!-- svelte-ignore a11y-click-events-have-key-events -->
+      <div class="course-level" on:click={()=>course_level.selected=!course_level.selected} class:selected={course_level.selected}>
+        <h2>{course_level.label}</h2>
       </div>
     {/each}
   </div>
@@ -152,6 +152,14 @@
     align-items: center;
     justify-content: start;
     padding: 1rem;
+  }
+
+  button {
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-family: inherit;
+    color: black;
   }
 
   .subtitle {
@@ -261,10 +269,12 @@
 
   .division, .course-level {
     opacity: 0.2;
+    scale: 0.9;
   }
 
   .division.selected, .course-level.selected {
     opacity: 1;
+    scale: 1;
   }
 
   .optimizations {
