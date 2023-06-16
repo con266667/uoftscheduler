@@ -116,8 +116,8 @@
     align-items: center;
     justify-content: center;
     color: white;
-    font-weight: 700;
-    font-size: 1.1rem;
+    font-weight: bold;
+    font-size: 0.8rem;
     width: 100%;
     height: 100%;
     padding: 1rem;
@@ -131,6 +131,7 @@
   }
 
   .courses {
+    opacity: 0.2;
     display: flex;
     flex-direction: column;
     align-items: start;
@@ -145,7 +146,7 @@
   }
 
   .courses h2 {
-    font-size: 1.2rem;
+    font-size: 0.8rem;
     font-weight: 700;
     padding: 0;
     padding-left: 1rem;
@@ -153,7 +154,7 @@
   }
 
   .courses p {
-    font-size: 0.8rem;
+    font-size: 0.6rem;
     font-weight: 500;
     padding: 0;
     padding-left: 1rem;
@@ -197,8 +198,8 @@
 
   .optimization img {
     display: block;
-    max-width: 5rem;
-    max-height: 5rem;
+    max-width: 100%;
+    max-height: 6rem;
     width: auto;
     height: auto;
     margin-bottom: 0.5rem;

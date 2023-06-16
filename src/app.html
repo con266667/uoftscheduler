@@ -6,15 +6,22 @@
 		<meta name="viewport" content="width=device-width" />
 		<link rel="preconnect" href="https://rsms.me/">
 		<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+		<link href="https://fonts.cdnfonts.com/css/hanson" rel="stylesheet">
 		%sveltekit.head%
 	</head>
 	<body data-sveltekit-preload-data="hover">
 		<div style="display: contents">%sveltekit.body%</div>
 	</body>
 	<style>
+		@font-face { font-family: 'hanson'; font-weight: bold; src: url('Hanson-Bold.otf');}
+
 		html {
-			font-family: 'Inter', sans-serif;
+			font-family: 'hanson', sans-serif;
 			background-color: #F2F2F2;
+		} 
+		
+		p {
+			font-family: 'Inter', sans-serif;
 		}
 	</style>
 </html>
