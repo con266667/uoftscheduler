@@ -8,9 +8,9 @@ export async function POST({ request }) {
         },
     };
 
-    if (browser) {
-        return new Response(JSON.stringify(test_data), init);
-    }
+    // if (browser) {
+    //     return new Response(JSON.stringify(test_data), init);
+    // }
 
     var myHeaders = new Headers();
     myHeaders.append("Accept", "application/json, text/plain, */*");
