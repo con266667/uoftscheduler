@@ -88,9 +88,18 @@
       averageStartTimeOptimizer
     );
 
-    timetable = timetable.filter(
-      (e) => e.section == newSchedule.get(e.course.code)
-    );
+    timetable = timetable
+      .filter((e) => e.section == newSchedule.get(e.course.code))
+      .filter(
+        (e, i, a) =>
+          a.findIndex(
+            (e2) =>
+              e2.course.code == e.course.code &&
+              e2.day == e.day &&
+              e2.startTime == e.startTime &&
+              e2.endTime == e.endTime
+          ) == i
+      );
   }
 
   function buildTimetable() {
