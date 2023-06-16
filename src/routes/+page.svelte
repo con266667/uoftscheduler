@@ -37,8 +37,11 @@
   }
 
   onMount(async () => {
-    let _courses = await getCourses();
-    courses = _courses.payload.pageableCourses;
+    // let _courses = await getCourses();
+    // courses = _courses.payload.pageableCourses;
+    fetch("/helloworld").then((res) => {
+      console.log(res);
+    });
   });
 </script>
 
