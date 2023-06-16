@@ -38,6 +38,7 @@
 
   onMount(async () => {
     let _courses = await getCourses();
+    console.log(_courses);
     courses = _courses.payload.pageableCourses;
     // fetch("/get-courses").then(async (res) => {
     //   console.log(res);
