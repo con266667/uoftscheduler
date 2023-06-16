@@ -1,11 +1,14 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { Division, Sessions } from "./values";
+  import Courses from "./courses.svelte";
+    import { writable } from "svelte/store";
 
   let selectedSession: typeof Sessions.Fall2023 = Sessions.Fall2023;
   let divisions: any[] = [];
   let course_levels: any[] = [];
   let can_search = false;
+  let viewingCourses = false;
 
   const divisionLabel: Record<string, string> = {
     'Faculty of Applied Science & Engineering': 'Engineering',
@@ -31,12 +34,7 @@
     "Fewer Gaps": "/fewer-gaps.png",
   }
 
-  let selectedCourses = [
-    "AER210",
-    "ESC203",
-    "MAT292",
-    "CSC258",
-  ]
+  let selectedCourses = writable<string[]>([]);
 
   let selectedOptimizations: string[] = [];
 
@@ -53,51 +51,32 @@
     can_search = divisions.some((e)=>e.selected) && course_levels.some((e)=>e.selected);
   }
 
-  async function getCourses() {
-    let res = await fetch("/get-courses", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify({
-        courseCodeAndTitleProps: {
-          courseCode: "",
-          courseTitle: "",
-          courseSectionCode: "",
-        },
-        departmentProps: [],
-        campuses: [],
-        sessions: [Sessions.Fall2023.id],
-        requirementProps: [],
-        instructor: "",
-        courseLevels: [],
-        deliveryModes: [],
-        dayPreferences: [],
-        timePreferences: [],
-        divisions: [Division.Engineering],
-        creditWeights: [],
-        page: 1,
-        pageSize: 100,
-        direction: "asc",
-      }),
-    });
-    return await res.json();
-  }
-
   async function getData() {
     let res = await fetch("/get-reference-data");
     return await res.json();
+  }
+
+  function viewCourses() {
+    viewingCourses = true;
+    history.pushState({}, "", "?page=courses");
   }
 
   onMount(async () => {
     let data = await getData();
     divisions = data.payload.divisions;
     course_levels = data.payload.courseLevels;
+
+    window.addEventListener("popstate", () => {
+      viewingCourses = false;
+    });
+
+    window.addEventListener("pushstate", () => {
+      viewingCourses = true;
+    });
   });
 </script>
 
-<div class="main">
+<div class="main" class:searching={viewingCourses}>
   <h1>UofT Planner</h1>
   <div class="sessions">
     {#each Object.values(Sessions) as session}
@@ -106,14 +85,16 @@
     {/each}
   </div>
   <h2 class="subtitle">Choose Courses</h2>
-  <div class="courses">
-    {#each selectedCourses as course}
-      <div class="course">
-        <h2>{course}</h2> ✕
-      </div>
-    {/each}
-    <div class="x-space"></div>
-  </div>
+  {#if $selectedCourses.length > 0}
+    <div class="courses">
+      {#each $selectedCourses as course}
+        <div class="course">
+          <h2>{course}</h2> <button on:click={()=>selectedCourses.update((courses)=>courses.filter((c)=>c!=course))}>✕</button>
+        </div>
+      {/each}
+      <div class="x-space"></div>
+    </div>
+  {/if}
   <div class="divisions">
     {#each divisions as division (division.value)}
       <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -130,7 +111,8 @@
       </div>
     {/each}
   </div>
-  <div class="create" class:selected={can_search}>RESULTS</div>
+  <!-- svelte-ignore a11y-click-events-have-key-events -->
+  <button disabled={!can_search} class="create" class:selected={can_search} on:click={viewCourses}>RESULTS</button>
   <pre style="margin-top: 10pt;"></pre>
   <h2 class="subtitle">Optimize</h2>
   <div class="optimizations">
@@ -145,6 +127,10 @@
   <div class="create">CREATE</div>
 </div>
 
+<div class="courses-page" class:enabled={viewingCourses}>
+  <Courses viewingCourses={viewingCourses} selectedCourses={selectedCourses} selectedSession={selectedSession.id} divisonIds={divisions.filter((d)=>d.selected).map((d)=>d.value)} courseLevels={course_levels.filter((c)=>c.selected).map((c)=>c.value)} />
+</div>
+
 <style>
   .main {
     display: flex;
@@ -152,6 +138,19 @@
     align-items: center;
     justify-content: start;
     padding: 1rem;
+  }
+
+  .courses-page {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .courses-page.enabled {
+    display: block;
   }
 
   button {
@@ -216,8 +215,12 @@
     width: 100vw; 
   }
 
+  .courses {
+    margin-bottom: 4pt;
+  }
+
   .divisions {
-    margin-top: 15pt;
+    margin-top: 8pt;
   }
 
   .course-levels {

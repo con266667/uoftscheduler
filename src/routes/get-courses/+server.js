@@ -25,7 +25,7 @@ export async function POST({ request }) {
         redirect: 'follow'
     };
   
-    var response = await fetch("https://api.easi.utoronto.ca/ttb/getPageableCourses", requestOptions)
+    var response = await fetch("https://api.easi.utoronto.ca/ttb/getCourses", requestOptions)
     var json = JSON.stringify(await response.json());
     return new Response(json, init);
 }
