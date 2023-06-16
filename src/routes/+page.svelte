@@ -109,7 +109,7 @@
           >
         </div>
       {/each}
-      <div class="x-space" />
+      <div>⠀</div>
     </div>
   {/if}
   <div class="divisions">
@@ -126,6 +126,7 @@
         <h2>{divisionLabel[division.label] ?? division.label}</h2>
       </button>
     {/each}
+    <div>⠀</div>
   </div>
   <div class="course-levels">
     {#each course_levels as course_level}
@@ -138,6 +139,7 @@
         <h2>{course_level.label}</h2>
       </div>
     {/each}
+    <div>⠀</div>
   </div>
   <!-- svelte-ignore a11y-click-events-have-key-events -->
   <button
@@ -276,6 +278,11 @@
     margin-top: 8pt;
     gap: 15pt;
     width: 100vw;
+
+    &:after {
+      content: "";
+      width: 1rem;
+    }
   }
 
   .courses {
@@ -302,12 +309,6 @@
     margin-left: 20pt;
   }
 
-  .x-space {
-    width: 20pt;
-    height: 10px;
-    border-radius: 8pt;
-  }
-
   .courses h2,
   .division h2,
   .course-level h2 {
@@ -319,7 +320,7 @@
   }
 
   .courses h2 {
-    margin-right: 5pt;
+    margin-right: 10pt;
   }
 
   .course,
@@ -335,6 +336,10 @@
     border-radius: 8pt;
     padding: 1rem;
     transition: all 0.2s ease-in-out;
+  }
+
+  .course {
+    padding-right: 0.5rem;
   }
 
   .division {

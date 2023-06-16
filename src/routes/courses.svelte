@@ -103,6 +103,7 @@
     width: 100%;
     text-align: left;
     margin-left: 50pt;
+    margin-top: 20pt;
   }
 
   .course {
