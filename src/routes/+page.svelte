@@ -5,7 +5,7 @@
   let courses: any[] = [];
 
   async function getCourses() {
-    let res = await fetch("https://get-courses.cnwilson29.workers.dev", {
+    let res = await fetch("/get-courses", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -37,11 +37,13 @@
   }
 
   onMount(async () => {
-    // let _courses = await getCourses();
-    // courses = _courses.payload.pageableCourses;
-    fetch("/helloworld").then((res) => {
-      console.log(res);
-    });
+    let _courses = await getCourses();
+    courses = _courses.payload.pageableCourses;
+    // fetch("/get-courses").then(async (res) => {
+    //   console.log(res);
+    //   let _courses = await res.json();
+    //   console.log(_courses);
+    // });
   });
 </script>
 
