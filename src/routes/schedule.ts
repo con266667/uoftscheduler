@@ -32,10 +32,18 @@ function averageStartTime(events: Event[]) {
 
 function averageEndTime(events: Event[]) {
     let sum = 0
-    for (const event of events) {
-        sum += event.endTime
+    let num = 0
+    for (var i = 1; i <= 5; i++) {
+        let eventsOnDay = events.filter(event => event.day === i)
+        if (eventsOnDay.length > 0) {
+            sum += Math.max(...eventsOnDay.map(event => event.endTime))
+            num++
+        }
     }
-    return sum / events.length
+
+    if (num === 0) return 0
+
+    return sum / num
 }
 
 function daysOff(events: Event[]) {
@@ -124,7 +132,6 @@ export function schedule(courses: Course[], optimizer: Function) {
     let optimizerCache = new Map()
 
     while (iters < Math.sqrt(otherSessions.length)*200 && otherSessions.length > 0) {
-        console.log(iters)
         iters++;
         let randomSession = otherSessions[Math.floor(Math.random() * otherSessions.length)]
         let newSchedule = new Map(_schedule)
@@ -134,6 +141,7 @@ export function schedule(courses: Course[], optimizer: Function) {
             continue
         } else {
             newCost = optimizer(_courses, newSchedule)
+            console.log(newCost)
             optimizerCache.set(newSchedule.toString(), newCost)
         }
         if (newCost < bestCost) {
