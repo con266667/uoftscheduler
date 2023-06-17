@@ -16,10 +16,18 @@ export type Schedule = Map<string, string>
 
 function averageStartTime(events: Event[]) {
     let sum = 0
-    for (const event of events) {
-        sum += event.startTime
+    let num = 0
+    for (var i = 1; i <= 5; i++) {
+        let eventsOnDay = events.filter(event => event.day === i)
+        if (eventsOnDay.length > 0) {
+            sum += Math.min(...eventsOnDay.map(event => event.startTime))
+            num++
+        }
     }
-    return sum / events.length
+
+    if (num === 0) return 0
+
+    return sum / num
 }
 
 function averageEndTime(events: Event[]) {
@@ -57,6 +65,7 @@ function numberOfConflicts(events: Event[]) {
             for (let j = i + 1; j < eventsOnDay.length; j++) {
                 if (eventsOnDay[i].endTime > eventsOnDay[j].startTime) {
                     if (eventsOnDay[i].startTime < eventsOnDay[j].endTime) {
+                        if (i === j) continue
                         conflicts++
                     }
                 }
@@ -114,7 +123,9 @@ export function schedule(courses: Course[], optimizer: Function) {
 
     let optimizerCache = new Map()
 
-    while (iters < 5000 && otherSessions.length > 0) {
+    while (iters < Math.sqrt(otherSessions.length)*200 && otherSessions.length > 0) {
+        console.log(iters)
+        iters++;
         let randomSession = otherSessions[Math.floor(Math.random() * otherSessions.length)]
         let newSchedule = new Map(_schedule)
         let newCost = 0;
@@ -126,7 +137,6 @@ export function schedule(courses: Course[], optimizer: Function) {
             optimizerCache.set(newSchedule.toString(), newCost)
         }
         if (newCost < bestCost) {
-            console.log(newCost)
             _schedule = newSchedule
             bestCost = newCost
             otherSessions = []
@@ -138,10 +148,11 @@ export function schedule(courses: Course[], optimizer: Function) {
                 }
             }
         }
-        iters++
+        
     }
 
     console.log(bestCost)
+    console.log("Done!")
 
     return _schedule
 }
