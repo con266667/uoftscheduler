@@ -12,6 +12,7 @@
   let fetchingCourses = true;
 
   async function getCourses() {
+    fetchingCourses = true;
     let res = await fetch("/get-courses", {
       method: "POST",
       headers: {
