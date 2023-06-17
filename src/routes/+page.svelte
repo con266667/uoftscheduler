@@ -4,6 +4,7 @@
   import Courses from "./courses.svelte";
   import { writable } from "svelte/store";
   import Timetable from "./timetable.svelte";
+  import { selectedCourses, selectedOptimizations } from "../stores";
 
   let selectedSession: typeof Sessions.Fall2023 = Sessions.Fall2023;
   let divisions: any[] = [];
@@ -37,18 +38,13 @@
     "Fewer Gaps": "/fewer-gaps.png",
   };
 
-  let selectedCourses = writable<any[]>([]);
-
-  let selectedOptimizations: string[] = [];
-
   function optimizationClicked(optimization: string) {
-    if (selectedOptimizations.includes(optimization)) {
-      selectedOptimizations = selectedOptimizations.filter(
-        (opt) => opt != optimization
+    if ($selectedOptimizations.includes(optimization)) {
+      selectedOptimizations.update((s) =>
+        s.filter((opt) => opt != optimization)
       );
     } else {
-      selectedOptimizations.push(optimization);
-      selectedOptimizations = [...selectedOptimizations];
+      selectedOptimizations.update((s) => [...s, optimization]);
     }
   }
 
@@ -154,7 +150,7 @@
       <!-- svelte-ignore a11y-click-events-have-key-events -->
       <div
         class="optimization"
-        class:selected={selectedOptimizations.includes(optimization)}
+        class:selected={$selectedOptimizations.includes(optimization)}
         on:click={() => optimizationClicked(optimization)}
       >
         <img src={optimizationImages[optimization]} alt={optimization} />
@@ -183,7 +179,11 @@
 </div>
 
 <div class="page" class:enabled={viewingTimetable}>
-  <Timetable {selectedOptimizations} {viewingTimetable} {selectedCourses} />
+  <Timetable
+    selectedOptimizations={$selectedOptimizations}
+    {viewingTimetable}
+    {selectedCourses}
+  />
 </div>
 
 <style>
