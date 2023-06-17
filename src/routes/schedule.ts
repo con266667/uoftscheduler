@@ -81,7 +81,7 @@ export function averageEndTimeOptimizer(courses: Course[], schedule: Schedule) {
     return 21 - (averageEndTime(events) / 3600000) + (numberOfConflicts(events) * 100)
 }
 
-export function chainOpimizers(optimizers: Function[]) {
+export function chainOptimizers(optimizers: Function[]) {
     return (courses: Course[], schedule: Schedule) => {
         let cost = 0
         for (let optimizer of optimizers) {
@@ -114,7 +114,7 @@ export function schedule(courses: Course[], optimizer: Function) {
 
     let optimizerCache = new Map()
 
-    while (iters < 1000 && otherSessions.length > 0) {
+    while (iters < 5000 && otherSessions.length > 0) {
         let randomSession = otherSessions[Math.floor(Math.random() * otherSessions.length)]
         let newSchedule = new Map(_schedule)
         let newCost = 0;

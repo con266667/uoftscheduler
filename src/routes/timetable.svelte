@@ -7,10 +7,13 @@
     daysOffOptimizer,
     type Schedule,
     averageStartTimeOptimizer,
+    averageEndTimeOptimizer,
+    chainOptimizers,
   } from "./schedule";
 
   export let viewingTimetable: boolean;
   export let selectedCourses: Writable<any[]>;
+  export let selectedOptimizations: string[];
   //   let timetable: any[] = [
   //     {
   //       course: {
@@ -83,9 +86,24 @@
       });
     }
 
+    let optimizationFunctions = [];
+    if (selectedOptimizations.includes("Fewer Days")) {
+      optimizationFunctions.push(daysOffOptimizer);
+    }
+    if (selectedOptimizations.includes("Late Start")) {
+      optimizationFunctions.push(averageStartTimeOptimizer);
+    }
+    if (selectedOptimizations.includes("Early Finish")) {
+      optimizationFunctions.push(averageEndTimeOptimizer);
+    }
+
+    if (optimizationFunctions.length == 0) {
+      optimizationFunctions.push(daysOffOptimizer);
+    }
+
     let newSchedule: Schedule = schedule(
       scheduleCourses,
-      averageStartTimeOptimizer
+      chainOptimizers(optimizationFunctions)
     );
 
     timetable = timetable

@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import type { Writable } from "svelte/store";
+  import MiniSearch from "minisearch";
 
   export let viewingCourses: boolean;
   export let selectedCourses: Writable<any[]>;
@@ -9,7 +10,56 @@
   export let courseLevels: string[];
 
   let courses: any[] = [];
+  let defaultOrder: string[] = [];
   let fetchingCourses = true;
+  let miniSearch: MiniSearch<any> | undefined;
+  let searchTerm = "";
+  let searchSet = new Set();
+
+  async function setupSearch() {
+    if (miniSearch == undefined) {
+      miniSearch = new MiniSearch({
+        fields: ["code", "name", "cmCourseInfo.description"], // fields to index for full-text search
+        storeFields: ["code"], // fields to return with search results
+        tokenize: (string, fieldName) => {
+          if (fieldName == "code") {
+            let tokens = [];
+            tokens.push(string.substring(0, 3));
+            tokens.push(string.substring(3, 6));
+            tokens.push(string.substring(0, 6));
+            return tokens;
+          }
+          return MiniSearch.getDefault("tokenize")(string, fieldName);
+        },
+      });
+      miniSearch.addAll(courses);
+    }
+  }
+
+  $: {
+    if (searchTerm != "") {
+      setupSearch();
+      let ids = miniSearch!.search(searchTerm, { fuzzy: 5 }).map((c) => c.id);
+      searchSet = new Set(ids);
+      // Sort by relevance
+      courses.sort((a, b) => {
+        if (ids.includes(a.id) && ids.includes(b.id)) {
+          return ids.indexOf(a.id) - ids.indexOf(b.id);
+        } else if (ids.includes(a.id)) {
+          return -1;
+        } else if (ids.includes(b.id)) {
+          return 1;
+        }
+        return 0;
+      });
+
+      courses = [...courses];
+    } else {
+      courses = courses.sort((a, b) => {
+        return defaultOrder.indexOf(a.id) - defaultOrder.indexOf(b.id);
+      });
+    }
+  }
 
   async function getCourses() {
     fetchingCourses = true;
@@ -40,7 +90,9 @@
       }),
     });
     courses = (await res.json()).payload;
+    defaultOrder = courses.map((c) => c.id);
     fetchingCourses = false;
+    setupSearch();
   }
 
   $: {
@@ -56,6 +108,14 @@
 
 <div class="main">
   <h1>Courses</h1>
+  <input
+    class="search"
+    type="text"
+    placeholder="Search"
+    on:input={(e) => {
+      searchTerm = e.target.value;
+    }}
+  />
   {#if fetchingCourses}
     <h2>Loading...</h2>
   {/if}
@@ -63,7 +123,10 @@
     <h2>No courses found</h2>
   {/if}
   {#each courses as course}
-    <div class="course">
+    <div
+      class="course"
+      class:enabled={searchTerm == "" || searchSet.has(course.id)}
+    >
       <div class="info">
         <h2>{course.name}</h2>
         <p>{course.code}</p>
@@ -105,6 +168,19 @@
     text-align: left;
     margin-left: 50pt;
     margin-top: 20pt;
+    margin-bottom: 7pt;
+  }
+
+  .search {
+    width: 80%;
+    height: 30pt;
+    border-radius: 8px;
+    border: none;
+    margin-bottom: 20pt;
+    padding-left: 10pt;
+    padding-top: 7pt;
+    padding-bottom: 7pt;
+    font-size: 1rem;
   }
 
   .course {
@@ -116,6 +192,13 @@
     min-height: 50pt;
     padding-top: 5pt;
     padding-bottom: 5pt;
+    opacity: 0;
+    height: 0;
+  }
+
+  .course.enabled {
+    opacity: 1;
+    height: auto;
   }
 
   .course .info {

@@ -183,7 +183,7 @@
 </div>
 
 <div class="page" class:enabled={viewingTimetable}>
-  <Timetable {viewingTimetable} {selectedCourses} />
+  <Timetable {selectedOptimizations} {viewingTimetable} {selectedCourses} />
 </div>
 
 <style>
