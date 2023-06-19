@@ -81,6 +81,17 @@
             endTime: meetingTime.end.millisofday,
           });
         }
+
+        events = events.filter(
+          (e, i, a) =>
+            a.findIndex(
+              (e2) =>
+                e2.day == e.day &&
+                e2.startTime == e.startTime &&
+                e2.endTime == e.endTime
+            ) == i
+        );
+
         schedule_course.sections[sectionType(section.name)!].push({
           code: course.code,
           type: sectionType(section.name)!,

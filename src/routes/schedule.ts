@@ -151,7 +151,7 @@ export function schedule(courses: Course[], optimizer: Function) {
 
     let optimizerCache = new Map()
 
-    while (iters < Math.sqrt(otherSections.length)*10000 && otherSections.length > 0) {
+    while (iters < Math.sqrt(otherSections.length)*500 && otherSections.length > 0) {
         iters++;
 
         let currentBestCost: number|undefined;
