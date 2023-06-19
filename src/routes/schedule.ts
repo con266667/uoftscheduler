@@ -198,7 +198,7 @@ function trySchedule(courses: Course[], optimizer: Function, schedule: Schedule 
 export function schedule(courses: Course[], optimizer: Function) {
     let schedules: any[] = []
 
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 40; i++) {
         // 30 generations
         for (let j = 0; j < 10; j++) {
             // 30 individuals per generation
@@ -210,7 +210,7 @@ export function schedule(courses: Course[], optimizer: Function) {
         }
     }
 
-    // console.log(schedules.find(schedule => schedule[1] === Math.min(...schedules.map(schedule => schedule[1]))))
+    console.log(schedules.find(schedule => schedule[1] === Math.min(...schedules.map(schedule => schedule[1]))))
     
     return schedules.find(schedule => schedule[1] === Math.min(...schedules.map(schedule => schedule[1])))?.[0]
 }
