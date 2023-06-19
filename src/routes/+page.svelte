@@ -77,6 +77,8 @@
     }
 
     params.append("sessions", selectedSession.id);
+    params.set("upperThreshold", "200");
+    params.set("lowerThreshold", "50");
 
     console.log(params.toString());
 
