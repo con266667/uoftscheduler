@@ -100,7 +100,6 @@
         });
       }
 
-      console.log(schedule_course);
       scheduleCourses.push(schedule_course);
     }
 
@@ -119,32 +118,29 @@
       optimizationFunctions.push(daysOffOptimizer);
     }
 
-    console.log(scheduleCourses);
-
     let newSchedule: Schedule = schedule(
       scheduleCourses,
       chainOptimizers(optimizationFunctions)
     );
 
-    console.log(newSchedule);
-
     // timetable = [];
 
-    timetable = timetable.filter(
-      (e) =>
-        newSchedule.get(e.course.code)?.get(sectionType(e.section)!) ==
-        e.section
-    );
-    // .filter(
-    //   (e, i, a) =>
-    //     a.findIndex(
-    //       (e2) =>
-    //         e2.course.code == e.course.code &&
-    //         e2.day == e.day &&
-    //         e2.startTime == e.startTime &&
-    //         e2.endTime == e.endTime
-    //     ) == i
-    // );
+    timetable = timetable
+      .filter(
+        (e) =>
+          newSchedule.get(e.course.code)?.get(sectionType(e.section)!) ==
+          e.section
+      )
+      .filter(
+        (e, i, a) =>
+          a.findIndex(
+            (e2) =>
+              e2.course.code == e.course.code &&
+              e2.day == e.day &&
+              e2.startTime == e.startTime &&
+              e2.endTime == e.endTime
+          ) == i
+      );
 
     currentlySelectedTimetableCourses = [...$selectedCourses];
     currentlySelectedTimetableOptimizations = [...selectedOptimizations];
