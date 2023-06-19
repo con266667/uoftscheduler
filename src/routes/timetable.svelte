@@ -76,6 +76,7 @@
         let events: Event[] = [];
         for (let meetingTime of section.meetingTimes) {
           events.push({
+            id: course.code + section.name,
             day: meetingTime.start.day,
             startTime: meetingTime.start.millisofday,
             endTime: meetingTime.end.millisofday,
@@ -99,7 +100,9 @@
           events: events,
         });
       }
-
+      if (scheduleCourses.find((e) => e.code == schedule_course.code)) {
+        continue;
+      }
       scheduleCourses.push(schedule_course);
     }
 
@@ -121,7 +124,7 @@
     let newSchedule: Schedule = schedule(
       scheduleCourses,
       chainOptimizers(optimizationFunctions)
-    );
+    )!;
 
     // timetable = [];
 
@@ -136,6 +139,7 @@
           a.findIndex(
             (e2) =>
               e2.course.code == e.course.code &&
+              e2.section == e.section &&
               e2.day == e.day &&
               e2.startTime == e.startTime &&
               e2.endTime == e.endTime
