@@ -12,21 +12,11 @@
   } from "./schedule";
   import { courses } from "../stores";
 
-  export let viewingTimetable: boolean;
   export let selectedCourses: Writable<any[]>;
   export let selectedOptimizations: string[];
-  //   let timetable: any[] = [
-  //     {
-  //       course: {
-  //         code: "CSC108H1",
-  //         name: "Introduction to Computer Programming",
-  //       },
-  //       day: 1,
-  //       startTime: 64800000,
-  //       endTime: 72000000,
-  //     },
-  //   ];
   let timetable: any[] = [];
+  let currentlySelectedTimetableCourses: any[] = [];
+  let currentlySelectedTimetableOptimizations: string[] = [];
 
   const times = [8, 9, 10, 11, 12, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 
@@ -59,11 +49,7 @@
 
   function callScheduler() {
     let scheduleCourses: Course[] = [];
-    // Remove duplicate sections
-    $selectedCourses = $selectedCourses.filter(
-      (course, index, self) =>
-        index === self.findIndex((c) => c.code === course.code)
-    );
+
     for (let selectedCourse of $selectedCourses) {
       console.log(selectedCourse);
       let course = $courses[selectedCourse.code];
@@ -133,6 +119,9 @@
               e2.endTime == e.endTime
           ) == i
       );
+
+    currentlySelectedTimetableCourses = [...$selectedCourses];
+    currentlySelectedTimetableOptimizations = [...selectedOptimizations];
   }
 
   function buildTimetable() {
@@ -146,57 +135,70 @@
   }
 
   $: {
-    if (viewingTimetable && timetable.length == 0) {
-      buildTimetable();
+    if (
+      $selectedCourses !== currentlySelectedTimetableCourses ||
+      selectedOptimizations !== currentlySelectedTimetableOptimizations
+    ) {
+      if (!($selectedCourses.length == 0)) {
+        let courseMissing = false;
+        for (let selectedCourse of $selectedCourses) {
+          if (!(selectedCourse.code in $courses)) {
+            courseMissing = true;
+            break;
+          }
+        }
+
+        if (!courseMissing) {
+          buildTimetable();
+        }
+      }
     }
   }
 </script>
 
-<div class="main">
-  <div class="timetable">
-    <div class="header">
-      <button disabled={currentDay == 0} on:click={() => currentDay--}
-        >{"<-"}</button
+<div class="timetable">
+  <div class="header">
+    <button disabled={currentDay == 0} on:click={() => currentDay--}
+      >{"<-"}</button
+    >
+    <h1>{days[currentDay]}</h1>
+    <button disabled={currentDay == 4} on:click={() => currentDay++}
+      >{"->"}</button
+    >
+  </div>
+  <div class="schedule">
+    {#each times as time, index}
+      <div
+        class="time"
+        class:filled={timetable
+          .filter((e) => e.day == currentDay + 1)
+          .find((e) => startMillisToIndex(e.startTime) == index) != undefined}
       >
-      <h1>{days[currentDay]}</h1>
-      <button disabled={currentDay == 4} on:click={() => currentDay++}
-        >{"->"}</button
-      >
-    </div>
-    <div class="schedule">
-      {#each times as time, index}
-        <div
-          class="time"
-          class:filled={timetable
-            .filter((e) => e.day == currentDay + 1)
-            .find((e) => startMillisToIndex(e.startTime) == index) != undefined}
-        >
-          <div class="line">
-            <h2>{time + ":00"}</h2>
-            <hr />
-          </div>
-
-          {#each timetable
-            .filter((e) => e.day == currentDay + 1)
-            .filter((e) => startMillisToIndex(e.startTime) == index) as event}
-            <div class="event">
-              <h3>{event.course.name}</h3>
-              <h3>{event.course.code}</h3>
-            </div>
-          {/each}
+        <div class="line">
+          <h2>{time + ":00"}</h2>
+          <hr />
         </div>
-      {/each}
-    </div>
+
+        {#each timetable
+          .filter((e) => e.day == currentDay + 1)
+          .filter((e) => startMillisToIndex(e.startTime) == index) as event}
+          <div class="event">
+            <h3>{event.course.name}</h3>
+            <h3>{event.course.code}</h3>
+          </div>
+        {/each}
+      </div>
+    {/each}
   </div>
 </div>
 
 <style>
-  .main {
+  .timetable {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    overflow-x: hidden;
+    width: 100vw;
   }
 
   button {
@@ -209,15 +211,6 @@
 
   button:disabled {
     color: #999;
-  }
-
-  .timetable {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
   }
 
   .header {
@@ -296,7 +289,6 @@
     flex-direction: column;
     align-items: flex-start;
     justify-content: center;
-    width: 100%;
     margin-left: 40pt;
     margin-right: 60pt;
     margin-top: 5pt;

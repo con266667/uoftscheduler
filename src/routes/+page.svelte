@@ -126,6 +126,12 @@
 
   $: getCoursesForSelected($selectedCourses);
   function getCoursesForSelected(selectedCourses: any[]) {
+    if (selectedCourses.length == 0) {
+      return;
+    }
+
+    console.log(selectedCourses);
+
     for (let course of selectedCourses) {
       if (!(course.code in $courses)) {
         getCourse(course);
@@ -146,38 +152,39 @@
 </script>
 
 <div class="main" class:searching={viewingCourses || viewingTimetable}>
-  <h1>UofT Planner</h1>
-  <div class="sessions">
-    {#each Object.values(Sessions) as session}
-      <!-- svelte-ignore a11y-click-events-have-key-events -->
-      <div
-        class="session"
-        class:selected={selectedSession == session}
-        style={session.style}
-        on:click={() => (selectedSession = session)}
-      >
-        {session.displayName}
-      </div>
-    {/each}
-  </div>
-  <!-- <h2 class="subtitle">Choose Courses</h2> -->
-  {#if $selectedCourses.length > 0}
-    <div class="courses">
-      {#each $selectedCourses as course}
-        <div class="course">
-          <h2>{course.code}</h2>
-          <button
-            on:click={() =>
-              selectedCourses.update((courses) =>
-                courses.filter((c) => c != course)
-              )}>✕</button
-          >
+  <div class="sidebar">
+    <h1>UofT Planner</h1>
+    <div class="sessions">
+      {#each Object.values(Sessions) as session}
+        <!-- svelte-ignore a11y-click-events-have-key-events -->
+        <div
+          class="session"
+          class:selected={selectedSession == session}
+          style={session.style}
+          on:click={() => (selectedSession = session)}
+        >
+          {session.displayName}
         </div>
       {/each}
-      <div>⠀</div>
     </div>
-  {/if}
-  <!-- <div class="divisions">
+    <!-- <h2 class="subtitle">Choose Courses</h2> -->
+    {#if $selectedCourses.length > 0}
+      <div class="courses">
+        {#each $selectedCourses as course}
+          <div class="course">
+            <h2>{course.code}</h2>
+            <button
+              on:click={() =>
+                selectedCourses.update((courses) =>
+                  courses.filter((c) => c.code != course.code)
+                )}>✕</button
+            >
+          </div>
+        {/each}
+        <div>⠀</div>
+      </div>
+    {/if}
+    <!-- <div class="divisions">
     {#each divisions as division (division.value)}
       <button
         class="division"
@@ -191,7 +198,7 @@
     {/each}
     <div>⠀</div>
   </div> -->
-  <!-- <div class="course-levels">
+    <!-- <div class="course-levels">
     {#each course_levels as course_level}
       <div
         class="course-level"
@@ -203,57 +210,67 @@
     {/each}
     <div>⠀</div>
   </div> -->
-  <div class="search-courses">
-    <input
-      type="text"
-      placeholder="Search Courses"
-      on:input={(e) => (searchTerm = e.target.value)}
-    />
-    {#each (cachedSearchResults[selectedSession.id] ?? {})[searchTerm] ?? [] as course}
-      <CourseTile
-        {course}
-        enabled={true}
-        added={$selectedCourses.find((c) => c.code == course.code) != undefined}
-        on:click={() => {
-          selectedCourses.update((courses) => [...courses, course]);
-          getCourse(course);
-        }}
+    <div class="search-courses">
+      <input
+        type="text"
+        placeholder="Search Courses"
+        on:input={(e) => (searchTerm = e.target.value)}
       />
-    {/each}
-  </div>
-  <!-- svelte-ignore a11y-click-events-have-key-events -->
-  <!-- <button
+      {#each (cachedSearchResults[selectedSession.id] ?? {})[searchTerm] ?? [] as course}
+        <CourseTile
+          {course}
+          enabled={true}
+          added={$selectedCourses.find((c) => c.code == course.code) !=
+            undefined}
+          on:click={() => {
+            if (
+              $selectedCourses.find((c) => c.code == course.code) != undefined
+            ) {
+              selectedCourses.update((courses) =>
+                courses.filter((c) => c.code != course.code)
+              );
+              return;
+            }
+            selectedCourses.update((courses) => [...courses, course]);
+            getCourse(course);
+          }}
+        />
+      {/each}
+    </div>
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
+    <!-- <button
     disabled={!can_search}
     class="create"
     class:selected={can_search}
     on:click={viewCourses}>RESULTS</button
   > -->
-  <pre style="margin-top: 10pt;" />
-  <!-- <h2 class="subtitle">Optimize</h2> -->
-  <div class="optimizations">
-    {#each optimizations as optimization}
-      <!-- svelte-ignore a11y-click-events-have-key-events -->
-      <div
-        class="optimization"
-        class:selected={$selectedOptimizations.includes(optimization)}
-        on:click={() => optimizationClicked(optimization)}
-      >
-        <img src={optimizationImages[optimization]} alt={optimization} />
-        <h2>{optimization}</h2>
-      </div>
-    {/each}
-  </div>
-  <button
+    <!-- <h2 class="subtitle">Optimize</h2> -->
+    <div class="optimizations">
+      {#each optimizations as optimization}
+        <!-- svelte-ignore a11y-click-events-have-key-events -->
+        <div
+          class="optimization"
+          class:selected={$selectedOptimizations.includes(optimization)}
+          on:click={() => optimizationClicked(optimization)}
+        >
+          <img src={optimizationImages[optimization]} alt={optimization} />
+          <h2>{optimization}</h2>
+        </div>
+      {/each}
+    </div>
+    <!-- <button
     class="create"
     disabled={!($selectedCourses.length > 0)}
     on:click={viewTimetable}
     class:selected={$selectedCourses.length > 0}
   >
     CREATE
-  </button>
+  </button> -->
+  </div>
+  <Timetable selectedOptimizations={$selectedOptimizations} {selectedCourses} />
 </div>
 
-<div class="page" class:enabled={viewingCourses && !viewingTimetable}>
+<!-- <div class="page" class:enabled={viewingCourses && !viewingTimetable}>
   <Courses
     {viewingCourses}
     {selectedCourses}
@@ -261,29 +278,45 @@
     divisonIds={divisions.filter((d) => d.selected).map((d) => d.value)}
     courseLevels={course_levels.filter((c) => c.selected).map((c) => c.value)}
   />
-</div>
+</div> -->
 
-<div class="page" class:enabled={viewingTimetable}>
-  <Timetable
-    selectedOptimizations={$selectedOptimizations}
-    {viewingTimetable}
-    {selectedCourses}
-  />
-</div>
+<!-- <div class="page" class:enabled={viewingTimetable} /> -->
 
 <style>
   .main {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: start;
     justify-content: start;
-    padding: 1rem;
   }
 
   .main.searching {
     height: 100vh;
     overflow: hidden;
     display: none;
+  }
+
+  .sidebar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: start;
+    width: 100%;
+    height: 100%;
+    /* max-width: 300px; */
+    margin-bottom: 1rem;
+    padding: 1rem;
+  }
+
+  @media (min-width: 900px) {
+    .main {
+      flex-direction: row;
+      justify-content: space-between;
+    }
+
+    .sidebar {
+      width: 40vw;
+    }
   }
 
   .page {
@@ -362,12 +395,7 @@
     justify-content: start;
     margin-top: 8pt;
     gap: 15pt;
-    width: 100vw;
-
-    &:after {
-      content: "";
-      width: 1rem;
-    }
+    width: 100%;
   }
 
   .courses {
@@ -388,11 +416,11 @@
     display: none;
   }
 
-  .course:first-of-type,
+  /* .course:first-of-type,
   .division:first-of-type,
   .course-level:first-of-type {
     margin-left: 20pt;
-  }
+  } */
 
   .courses h2,
   .division h2,
