@@ -85,7 +85,7 @@ function numberOfConflicts(events: Event[]) {
         for (let i = 0; i < eventsOnDay.length - 1; i++) {
             var done = false
             while (!done) {
-                if (eventsOnDay[i].endTime > eventsOnDay[i + 1].startTime) {
+                if (i < eventsOnDay.length - 2 && eventsOnDay[i].endTime > eventsOnDay[i + 1].startTime) {
                     conflicts++
                 } else {
                     done = true
