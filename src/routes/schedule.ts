@@ -156,7 +156,7 @@ function trySchedule(courses: Course[], optimizer: Function) {
     while (iters < 100 && otherSections.length > 0) {
         iters++;
 
-        let currentBestCost: number|undefined;
+        let currentBestCost = Infinity;
         let currentBestSection: Section|undefined;
 
         for (let section of otherSections) {
@@ -166,10 +166,12 @@ function trySchedule(courses: Course[], optimizer: Function) {
             if (optimizerCache.has(newSchedule.toString())) {
                 continue
             } else  {
-                if (currentBestCost === undefined) {
-                    currentBestCost = optimizer(_courses, newSchedule);
+                let cost = optimizer(_courses, newSchedule);
+                if (cost < currentBestCost) {
+                    currentBestCost = cost
                     currentBestSection = section
                 }
+
                 optimizerCache.set(newSchedule.toString(), currentBestCost)
             }
         }       
