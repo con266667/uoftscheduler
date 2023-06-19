@@ -9,9 +9,9 @@ export async function GET({ url }) {
         },
     };
 
-    if (dev) {
-        return new Response(JSON.stringify(test_data), init);
-    }
+    // if (dev) {
+    //     return new Response(JSON.stringify(test_data), init);
+    // }
 
     var myHeaders = new Headers();
     myHeaders.append("Accept", "application/json, text/plain, */*");

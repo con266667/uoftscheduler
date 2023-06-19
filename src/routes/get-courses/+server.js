@@ -8,11 +8,11 @@ export async function POST({ request }) {
         },
     };
 
-    if (dev) {
-        return new Response(JSON.stringify({payload: test_data.payload.sort((a,b)=>
-            Math.random() - 0.5
-        )}), init);
-    }
+    // if (dev) {
+    //     return new Response(JSON.stringify({payload: test_data.payload.sort((a,b)=>
+    //         Math.random() - 0.5
+    //     )}), init);
+    // }
 
     var myHeaders = new Headers();
     myHeaders.append("Accept", "application/json, text/plain, */*");
@@ -24,7 +24,6 @@ export async function POST({ request }) {
         method: 'POST',
         headers: myHeaders,
         body: JSON.stringify(requestJson),
-        redirect: 'follow'
     };
   
     var response = await fetch("https://api.easi.utoronto.ca/ttb/getCourses", requestOptions)

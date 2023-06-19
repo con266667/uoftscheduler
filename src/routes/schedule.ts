@@ -1,3 +1,5 @@
+import { randomInt } from 'crypto';
+
 export type Event = {
     day: number,
     startTime: number,
@@ -94,17 +96,20 @@ function numberOfConflicts(events: Event[]) {
 
 export function averageStartTimeOptimizer(courses: Course[], schedule: Schedule) {
     let events = allEvents(courses, schedule)
-    return 24 - averageStartTime(events) / 3600000 + (numberOfConflicts(events) * 100)
+    return 24 - averageStartTime(events) * 0.00000027777778 + (numberOfConflicts(events) * 100)
 }
 
 export function daysOffOptimizer(courses: Course[], schedule: Schedule) {
+    let start = process.hrtime.bigint();
     let events = allEvents(courses, schedule)
-    return 5 - daysOff(events) + (numberOfConflicts(events) * 100)
+    let cost = 5 - daysOff(events) + (numberOfConflicts(events) * 100)
+    let end = process.hrtime.bigint();
+    return cost
 }
 
 export function averageEndTimeOptimizer(courses: Course[], schedule: Schedule) {
     let events = allEvents(courses, schedule)
-    return (averageEndTime(events) / 3600000) + (numberOfConflicts(events) * 100)
+    return (averageEndTime(events) * 0.00000027777778) + (numberOfConflicts(events) * 100)
 }
 
 export function chainOptimizers(optimizers: Function[]) {
@@ -118,6 +123,7 @@ export function chainOptimizers(optimizers: Function[]) {
 }
 
 function randomSchedule(courses: Course[], schedule: Schedule | undefined): [Schedule, Section[]] {
+    let start = process.hrtime.bigint();
     let _schedule: Schedule = new Map()
 
     if (schedule) {
@@ -151,25 +157,37 @@ function randomSchedule(courses: Course[], schedule: Schedule | undefined): [Sch
         }
     }
 
+    let end = process.hrtime.bigint();
     return [_schedule, otherSections]
 }
 
 function trySchedule(courses: Course[], optimizer: Function, optimizerCache: Map<string, number>, schedule: Schedule | undefined): [Schedule, number] {
+    let start = process.hrtime.bigint();
+    let setupStart = process.hrtime.bigint();
+
     let [_schedule, otherSections] = randomSchedule(courses, schedule);
-    let bestCost = optimizer(courses, _schedule);
+    let bestCost = 0;
+    if (optimizerCache.has(_schedule.toString())) {
+        bestCost = optimizer(courses, _schedule);
+    } else {
+        bestCost = optimizer(courses, _schedule);
+        optimizerCache.set(_schedule.toString(), bestCost);
+    }
     let iters = 0
 
     let currentSchedule = new Map(_schedule);
     let currentCost = bestCost;
 
-    while (iters < 10 && otherSections.length > 0) {
+    let setupEnd = process.hrtime.bigint();
+    let exploreStart = process.hrtime.bigint();
+    while (iters < 100 && otherSections.length > 0) {
         iters++;
 
         let randomSection = otherSections[Math.floor(Math.random() * otherSections.length)]
         currentSchedule.get(randomSection.code)!.set(randomSection.type, randomSection.id);
 
         if (optimizerCache.has(currentSchedule.toString())) {
-            currentCost = optimizerCache.get(currentSchedule.toString())
+            currentCost = optimizerCache.get(currentSchedule.toString())!
         } else {
             currentCost = optimizer(courses, currentSchedule)
             optimizerCache.set(currentSchedule.toString(), currentCost);
@@ -190,27 +208,276 @@ function trySchedule(courses: Course[], optimizer: Function, optimizerCache: Map
             }
         }
     }
+    let exploreEnd = process.hrtime.bigint();
 
+    let end = process.hrtime.bigint();
     return [_schedule, bestCost]
 }
 
 export function schedule(courses: Course[], optimizer: Function) {
-    let schedules: any[] = []
     let optimizerCache = new Map()
     let bestSchedule: [Schedule, number] | undefined = undefined
+    let bestCost = Infinity
 
     for (let i = 0; i < 200; i++) { // Generations
         for (let j = 0; j < 5; j++) { // Population
-            if (schedules.length === 0) {
-                schedules.push(trySchedule(courses, optimizer, optimizerCache, undefined))
+            if (bestSchedule === undefined) {
+                let rnd = randomSchedule(courses, undefined)
+                let rndCost = optimizer(courses, rnd[0]);
+                if (rndCost < bestCost) {
+                    bestSchedule = [rnd[0], rndCost]
+                }
             } else {
-                schedules.push(trySchedule(courses, optimizer, optimizerCache, bestSchedule?.[0]))
+                let iter = trySchedule(courses, optimizer, optimizerCache, bestSchedule?.[0]);
+                if (iter[1] < bestCost) {
+                    bestSchedule = iter;
+                    bestCost = iter[1];
+                }
             }
-            bestSchedule = schedules.find(schedule => schedule[1] === Math.min(...schedules.map(schedule => schedule[1])))
         }
     }
 
-    console.log(bestSchedule)
+    if (bestSchedule?.[1] !== 205) {
+        console.log("Not optimal")
+    }
     
     return bestSchedule?.[0]
 }
+
+
+let testCourses = [
+    {
+        "code": "JRE300H1",
+        "sections": {
+            "lecture": [
+                {
+                    "code": "JRE300H1",
+                    "type": "lecture",
+                    "id": "LEC0101",
+                    "events": [
+                        {
+                            "id": "JRE300H1LEC0101",
+                            "day": 2,
+                            "startTime": 54000000,
+                            "endTime": 64800000
+                        },
+                        {
+                            "id": "JRE300H1LEC0101",
+                            "day": 4,
+                            "startTime": 54000000,
+                            "endTime": 64800000
+                        }
+                    ]
+                }
+            ],
+            "tutorial": [
+                {
+                    "code": "JRE300H1",
+                    "type": "tutorial",
+                    "id": "TUT0101",
+                    "events": [
+                        {
+                            "id": "JRE300H1TUT0101",
+                            "day": 5,
+                            "startTime": 64800000,
+                            "endTime": 72000000
+                        }
+                    ]
+                }
+            ],
+            "lab": []
+        }
+    },
+    {
+        "code": "MAT187H1",
+        "sections": {
+            "lecture": [
+                {
+                    "code": "MAT187H1",
+                    "type": "lecture",
+                    "id": "LEC0101",
+                    "events": [
+                        {
+                            "id": "MAT187H1LEC0101",
+                            "day": 2,
+                            "startTime": 50400000,
+                            "endTime": 57600000
+                        },
+                        {
+                            "id": "MAT187H1LEC0101",
+                            "day": 3,
+                            "startTime": 50400000,
+                            "endTime": 57600000
+                        },
+                        {
+                            "id": "MAT187H1LEC0101",
+                            "day": 5,
+                            "startTime": 32400000,
+                            "endTime": 39600000
+                        }
+                    ]
+                }
+            ],
+            "tutorial": [
+                {
+                    "code": "MAT187H1",
+                    "type": "tutorial",
+                    "id": "TUT0101",
+                    "events": [
+                        {
+                            "id": "MAT187H1TUT0101",
+                            "day": 3,
+                            "startTime": 57600000,
+                            "endTime": 64800000
+                        }
+                    ]
+                }
+            ],
+            "lab": []
+        }
+    },
+    {
+        "code": "MIE100H1",
+        "sections": {
+            "lecture": [
+                {
+                    "code": "MIE100H1",
+                    "type": "lecture",
+                    "id": "LEC0101",
+                    "events": [
+                        {
+                            "id": "MIE100H1LEC0101",
+                            "day": 2,
+                            "startTime": 57600000,
+                            "endTime": 64800000
+                        },
+                        {
+                            "id": "MIE100H1LEC0101",
+                            "day": 4,
+                            "startTime": 32400000,
+                            "endTime": 39600000
+                        },
+                        {
+                            "id": "MIE100H1LEC0101",
+                            "day": 5,
+                            "startTime": 39600000,
+                            "endTime": 46800000
+                        }
+                    ]
+                }
+            ],
+            "tutorial": [
+                {
+                    "code": "MIE100H1",
+                    "type": "tutorial",
+                    "id": "TUT0101",
+                    "events": [
+                        {
+                            "id": "MIE100H1TUT0101",
+                            "day": 5,
+                            "startTime": 57600000,
+                            "endTime": 64800000
+                        }
+                    ]
+                }
+            ],
+            "lab": []
+        }
+    },
+    {
+        "code": "APS112H1",
+        "sections": {
+            "lecture": [
+                {
+                    "code": "APS112H1",
+                    "type": "lecture",
+                    "id": "LEC0101",
+                    "events": [
+                        {
+                            "id": "APS112H1LEC0101",
+                            "day": 1,
+                            "startTime": 57600000,
+                            "endTime": 64800000
+                        },
+                        {
+                            "id": "APS112H1LEC0101",
+                            "day": 5,
+                            "startTime": 50400000,
+                            "endTime": 57600000
+                        }
+                    ]
+                }
+            ],
+            "tutorial": [
+                {
+                    "code": "APS112H1",
+                    "type": "tutorial",
+                    "id": "TUT0101",
+                    "events": [
+                        {
+                            "id": "APS112H1TUT0101",
+                            "day": 1,
+                            "startTime": 64800000,
+                            "endTime": 72000000
+                        },
+                        {
+                            "id": "APS112H1TUT0101",
+                            "day": 4,
+                            "startTime": 64800000,
+                            "endTime": 72000000
+                        }
+                    ]
+                }
+            ],
+            "lab": []
+        }
+    },
+    {
+        "code": "APS163H1",
+        "sections": {
+            "lecture": [
+                {
+                    "code": "APS163H1",
+                    "type": "lecture",
+                    "id": "LEC0101",
+                    "events": []
+                }
+            ],
+            "tutorial": [
+                {
+                    "code": "APS163H1",
+                    "type": "tutorial",
+                    "id": "TUT0101",
+                    "events": [
+                        {
+                            "id": "APS163H1TUT0101",
+                            "day": 3,
+                            "startTime": 64800000,
+                            "endTime": 72000000
+                        }
+                    ]
+                }
+            ],
+            "lab": []
+        }
+    }
+]
+
+const testSchedule = new Map();
+testSchedule.set("JRE300H1", new Map([["lecture", "LEC0101"], ["tutorial", "TUT0101"], ["lab", ""]]));
+testSchedule.set("MAT187H1", new Map([["lecture", "LEC0101"], ["tutorial", "TUT0101"], ["lab", ""]]));
+testSchedule.set("MIE100H1", new Map([["lecture", "LEC0101"], ["tutorial", "TUT0101"], ["lab", ""]]));
+testSchedule.set("APS112H1", new Map([["lecture", "LEC0101"], ["tutorial", "TUT0101"], ["lab", ""]]));
+testSchedule.set("APS163H1", new Map([["lecture", "LEC0101"], ["tutorial", "TUT0101"], ["lab", ""]]));
+
+let times = [];
+for (let i = 0; i < 1000; i++) {
+    let start = process.hrtime.bigint();
+    schedule(testCourses, daysOffOptimizer);
+    let end = process.hrtime.bigint();
+    times.push(Number(end - start));
+}
+
+let avg = times.reduce((a, b) => a + b) / times.length;
+
+console.log(avg / 1000000);
