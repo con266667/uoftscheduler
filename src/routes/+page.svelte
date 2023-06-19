@@ -81,7 +81,7 @@
     fetch("/search-courses?" + params.toString())
       .then((res) => res.json())
       .then((data) => {
-        console.log(data.payload.codesAndTitles);
+        console.log(data);
         cachedSearchResults[searchTerm] = data.payload.codesAndTitles;
       });
   }
