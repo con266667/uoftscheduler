@@ -13,7 +13,7 @@
   let can_search = false;
   let viewingCourses = false;
   let viewingTimetable = false;
-  let cachedSearchResults: Record<string, any[]> = {};
+  let cachedSearchResults: Record<string, Record<string, any[]>> = {};
   let searchTerm = "";
 
   const divisionLabel: Record<string, string> = {
@@ -67,9 +67,15 @@
     if (searchTerm == "") {
       return [];
     }
-    if (searchTerm in cachedSearchResults) {
-      return cachedSearchResults[searchTerm];
+
+    if (!(selectedSession.id in cachedSearchResults)) {
+      cachedSearchResults[selectedSession.id] = {};
     }
+
+    if (searchTerm in cachedSearchResults[selectedSession.id]) {
+      return cachedSearchResults[selectedSession.id][searchTerm];
+    }
+
     let params = new URLSearchParams();
     params.append("term", searchTerm);
     for (let division of divisions) {
@@ -80,12 +86,11 @@
     params.set("upperThreshold", "200");
     params.set("lowerThreshold", "50");
 
-    console.log(params.toString());
-
     let res = await fetch("/search-courses?" + params.toString());
     let data = await res.json();
     console.log(data);
-    cachedSearchResults[searchTerm] = data.payload.codesAndTitles;
+    cachedSearchResults[selectedSession.id][searchTerm] =
+      data.payload.codesAndTitles;
   }
 
   $: searchCourses(searchTerm);
@@ -171,7 +176,7 @@
       placeholder="Search Courses"
       on:input={(e) => (searchTerm = e.target.value)}
     />
-    {#each cachedSearchResults[searchTerm] ?? [] as course}
+    {#each (cachedSearchResults[selectedSession.id] ?? {})[searchTerm] ?? [] as course}
       <CourseTile
         {course}
         enabled={true}
