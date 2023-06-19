@@ -85,7 +85,7 @@ function numberOfConflicts(events: Event[]) {
 
 export function averageStartTimeOptimizer(courses: Course[], schedule: Schedule) {
     let events = allEvents(courses, schedule)
-    return averageStartTime(events) / 3600000 + (numberOfConflicts(events) * 100)
+    return 24 - averageStartTime(events) / 3600000 + (numberOfConflicts(events) * 100)
 }
 
 export function daysOffOptimizer(courses: Course[], schedule: Schedule) {
@@ -95,7 +95,7 @@ export function daysOffOptimizer(courses: Course[], schedule: Schedule) {
 
 export function averageEndTimeOptimizer(courses: Course[], schedule: Schedule) {
     let events = allEvents(courses, schedule)
-    return 21 - (averageEndTime(events) / 3600000) + (numberOfConflicts(events) * 100)
+    return (averageEndTime(events) / 3600000) + (numberOfConflicts(events) * 100)
 }
 
 export function chainOptimizers(optimizers: Function[]) {

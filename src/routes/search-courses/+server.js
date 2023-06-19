@@ -31,7 +31,7 @@ const test_data = {
     "payload": {
         "codesAndTitles": [
             {
-                "code": "MAT85H1",
+                "code": "MAT185H1",
                 "sectionCode": "Y",
                 "name": "LinAlg",
                 "description": "this second part of the introductory calculus sequence focuses on integral calculus beginning with the fundamental theorem of calculus, the connection between two seemingly unrelated problems: measuring changing quantities and finding areas of curved shapes. students will develop a deep understanding of the integral, and use it to: unpack equations involving derivatives; to make sense of infinite sums; to write complicated functions as 'infinite polynomials'; and to compute areas, volumes, and totals in applied problems. this course will further develop students' abilities to translate between algebraic, graphical, numerical, and verbal descriptions of mathematics in a variety of applied contexts. this course is a continuation of mat135h1 and will be useful for students interested in learning applied calculus in relation to future studies in economics, life science, and physical and mathematical science programs.",
