@@ -117,7 +117,7 @@ export function chainOptimizers(optimizers: Function[]) {
     }
 }
 
-export function schedule(courses: Course[], optimizer: Function) {
+function trySchedule(courses: Course[], optimizer: Function) {
     let _schedule: Schedule = new Map()
     let _courses = courses.slice()
 
@@ -127,7 +127,10 @@ export function schedule(courses: Course[], optimizer: Function) {
             // @ts-ignore
             if (course.sections[section_type].length > 0) {
                 // @ts-ignore
-                _schedule.get(course.code)!.set(section_type, course.sections[section_type][0].id)
+                _schedule.get(course.code)!.set(section_type, course.sections[section_type][
+                    // @ts-ignore
+                    Math.floor(Math.random() * course.sections[section_type].length)
+                ].id)
             } else {
                 _schedule.get(course.code)!.set(section_type, "")
             }
@@ -150,7 +153,7 @@ export function schedule(courses: Course[], optimizer: Function) {
 
     let optimizerCache = new Map()
 
-    while (iters < Math.sqrt(otherSections.length)*10000 && otherSections.length > 0) {
+    while (iters < 100 && otherSections.length > 0) {
         iters++;
 
         let currentBestCost: number|undefined;
@@ -189,6 +192,21 @@ export function schedule(courses: Course[], optimizer: Function) {
     }
 
     console.log(bestCost)
+    return _schedule
+}
+
+export function schedule(courses: Course[], optimizer: Function) {
+    let bestCost = Infinity;
+    let _schedule: Schedule = new Map()
+
+    for (let i = 0; i < 100; i++) {
+        let newSchedule = trySchedule(courses, optimizer)
+        let cost = optimizer(courses, newSchedule)
+        if (cost < bestCost) {
+            _schedule = newSchedule
+            bestCost = cost
+        }
+    }
 
     return _schedule
 }
