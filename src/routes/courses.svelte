@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import type { Writable } from "svelte/store";
   import MiniSearch from "minisearch";
+  import CourseTile from "../components/course_tile.svelte";
 
   export let viewingCourses: boolean;
   export let selectedCourses: Writable<any[]>;
@@ -123,28 +124,20 @@
     <h2>No courses found</h2>
   {/if}
   {#each courses as course}
-    <div
-      class="course"
-      class:enabled={searchTerm == "" || searchSet.has(course.id)}
-    >
-      <div class="info">
-        <h2>{course.name}</h2>
-        <p>{course.code}</p>
-      </div>
-      <button
-        class="add"
-        on:click={() => {
-          if ($selectedCourses.includes(course)) {
-            selectedCourses.update((courses) =>
-              courses.filter((c) => c != course)
-            );
-          } else {
-            selectedCourses.update((courses) => [...courses, course]);
-          }
-        }}>{$selectedCourses.includes(course) ? "Remove" : "Add"}</button
-      >
-    </div>
-    <hr />
+    <CourseTile
+      {course}
+      enabled={searchTerm == "" || searchSet.has(course.id)}
+      on:click={() => {
+        if ($selectedCourses.includes(course)) {
+          selectedCourses.update((courses) =>
+            courses.filter((c) => c != course)
+          );
+        } else {
+          selectedCourses.update((courses) => [...courses, course]);
+        }
+      }}
+      added={$selectedCourses.includes(course)}
+    />
   {/each}
   <pre style="margin-bottom: 70pt;" />
 </div>
@@ -181,64 +174,5 @@
     padding-top: 7pt;
     padding-bottom: 7pt;
     font-size: 1rem;
-  }
-
-  .course {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    min-height: 50pt;
-    padding-top: 5pt;
-    padding-bottom: 5pt;
-    opacity: 0;
-    height: 0;
-  }
-
-  .course.enabled {
-    opacity: 1;
-    height: auto;
-  }
-
-  .course .info {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: center;
-  }
-
-  .course h2 {
-    margin: 0;
-    padding: 0;
-    margin-left: 20px;
-    font-size: 1rem;
-  }
-
-  .course p {
-    margin: 0;
-    padding: 0;
-    margin-left: 20px;
-    font-size: 0.8rem;
-    color: #777;
-  }
-
-  hr {
-    width: 100%;
-    margin: 0;
-    padding: 0;
-    margin-left: 10px;
-    border: 1px solid #e0e0e0;
-  }
-
-  .add {
-    margin-right: 20px;
-    margin-left: 20px;
-    border-radius: 5px;
-    padding: 5px;
-    font-size: 0.8rem;
-    font-weight: 700;
-    border: none;
-    transition: all 0.2s ease-in-out;
   }
 </style>

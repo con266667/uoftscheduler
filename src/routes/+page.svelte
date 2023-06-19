@@ -5,6 +5,7 @@
   import { writable } from "svelte/store";
   import Timetable from "./timetable.svelte";
   import { selectedCourses, selectedOptimizations } from "../stores";
+  import CourseTile from "../components/course_tile.svelte";
 
   let selectedSession: typeof Sessions.Fall2023 = Sessions.Fall2023;
   let divisions: any[] = [];
@@ -12,6 +13,8 @@
   let can_search = false;
   let viewingCourses = false;
   let viewingTimetable = false;
+  let cachedSearchResults: Record<string, any[]> = {};
+  let searchTerm = "";
 
   const divisionLabel: Record<string, string> = {
     "Faculty of Applied Science & Engineering": "Engineering",
@@ -59,6 +62,32 @@
     return await res.json();
   }
 
+  async function searchCourses(searchTerm: string) {
+    console.log(searchTerm);
+    if (searchTerm == "") {
+      return [];
+    }
+    if (searchTerm in cachedSearchResults) {
+      return cachedSearchResults[searchTerm];
+    }
+    let params = new URLSearchParams();
+    params.append("term", searchTerm);
+    for (let division of divisions) {
+      params.append("divisions", division.name);
+    }
+
+    params.append("sessions", selectedSession.id);
+
+    fetch("/search-courses?" + params.toString())
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(data.payload.codesAndTitles);
+        cachedSearchResults[searchTerm] = data.payload.codesAndTitles;
+      });
+  }
+
+  $: searchCourses(searchTerm);
+
   function viewCourses() {
     viewingCourses = true;
     history.pushState({}, "", "?page=courses");
@@ -91,7 +120,7 @@
       </div>
     {/each}
   </div>
-  <h2 class="subtitle">Choose Courses</h2>
+  <!-- <h2 class="subtitle">Choose Courses</h2> -->
   {#if $selectedCourses.length > 0}
     <div class="courses">
       {#each $selectedCourses as course}
@@ -108,9 +137,8 @@
       <div>⠀</div>
     </div>
   {/if}
-  <div class="divisions">
+  <!-- <div class="divisions">
     {#each divisions as division (division.value)}
-      <!-- svelte-ignore a11y-click-events-have-key-events -->
       <button
         class="division"
         on:click={() => {
@@ -122,10 +150,9 @@
       </button>
     {/each}
     <div>⠀</div>
-  </div>
-  <div class="course-levels">
+  </div> -->
+  <!-- <div class="course-levels">
     {#each course_levels as course_level}
-      <!-- svelte-ignore a11y-click-events-have-key-events -->
       <div
         class="course-level"
         on:click={() => (course_level.selected = !course_level.selected)}
@@ -135,16 +162,33 @@
       </div>
     {/each}
     <div>⠀</div>
+  </div> -->
+  <div class="search-courses">
+    <input
+      type="text"
+      placeholder="Search Courses"
+      on:input={(e) => (searchTerm = e.target.value)}
+    />
+    {#each cachedSearchResults[searchTerm] ?? [] as course}
+      <CourseTile
+        {course}
+        enabled={true}
+        added={$selectedCourses.includes(course)}
+        on:click={() => {
+          selectedCourses.update((courses) => [...courses, course]);
+        }}
+      />
+    {/each}
   </div>
   <!-- svelte-ignore a11y-click-events-have-key-events -->
-  <button
+  <!-- <button
     disabled={!can_search}
     class="create"
     class:selected={can_search}
     on:click={viewCourses}>RESULTS</button
-  >
+  > -->
   <pre style="margin-top: 10pt;" />
-  <h2 class="subtitle">Optimize</h2>
+  <!-- <h2 class="subtitle">Optimize</h2> -->
   <div class="optimizations">
     {#each optimizations as optimization}
       <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -240,6 +284,7 @@
     align-items: center;
     justify-content: space-evenly;
     margin-top: 15pt;
+    margin-bottom: 30pt;
     gap: 15pt;
     width: 100%;
   }
@@ -355,6 +400,27 @@
   .course-level.selected {
     opacity: 1;
     scale: 1;
+  }
+
+  .search-courses {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 8pt;
+    margin-bottom: 8pt;
+    width: calc(100% - 20pt);
+  }
+
+  .search-courses input {
+    width: 100%;
+    padding: 0.8rem;
+    border-radius: 8pt;
+    border: 1px solid #ccc;
+    font-size: 1.2rem;
+    font-weight: 700;
+    outline: none;
   }
 
   .optimizations {
