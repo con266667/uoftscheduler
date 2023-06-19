@@ -466,8 +466,11 @@
 
   .optimizations {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
+    /* grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr; */
+    /* Force a row of 4 */
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    grid-auto-rows: 1fr;
     gap: 15pt;
     width: 100%;
     margin-top: 8pt;
@@ -502,7 +505,7 @@
   .optimization img {
     display: block;
     max-width: 100%;
-    max-height: 6rem;
+    max-height: 4rem;
     width: auto;
     height: auto;
     margin-bottom: 0.5rem;
