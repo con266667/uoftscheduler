@@ -395,7 +395,7 @@
     justify-content: start;
     margin-top: 8pt;
     gap: 15pt;
-    width: 100%;
+    max-width: 100%;
   }
 
   .courses {

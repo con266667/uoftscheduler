@@ -131,7 +131,7 @@ export function schedule(courses: Course[], optimizer: Function) {
 
     let optimizerCache = new Map()
 
-    while (iters < Math.sqrt(otherSessions.length)*200 && otherSessions.length > 0) {
+    while (iters < Math.sqrt(otherSessions.length)*10000 && otherSessions.length > 0) {
         iters++;
         let randomSession = otherSessions[Math.floor(Math.random() * otherSessions.length)]
         let newSchedule = new Map(_schedule)

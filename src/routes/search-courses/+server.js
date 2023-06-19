@@ -31,9 +31,9 @@ const test_data = {
     "payload": {
         "codesAndTitles": [
             {
-                "code": "MAT136H1",
+                "code": "MAT85H1",
                 "sectionCode": "Y",
-                "name": "Calculus II",
+                "name": "LinAlg",
                 "description": "this second part of the introductory calculus sequence focuses on integral calculus beginning with the fundamental theorem of calculus, the connection between two seemingly unrelated problems: measuring changing quantities and finding areas of curved shapes. students will develop a deep understanding of the integral, and use it to: unpack equations involving derivatives; to make sense of infinite sums; to write complicated functions as 'infinite polynomials'; and to compute areas, volumes, and totals in applied problems. this course will further develop students' abilities to translate between algebraic, graphical, numerical, and verbal descriptions of mathematics in a variety of applied contexts. this course is a continuation of mat135h1 and will be useful for students interested in learning applied calculus in relation to future studies in economics, life science, and physical and mathematical science programs.",
                 "sessions": [
                     "20235"
@@ -45,9 +45,9 @@ const test_data = {
                 "rank": 6
             },
             {
-                "code": "MAT136H1",
+                "code": "ESC102H1",
                 "sectionCode": "F",
-                "name": "Calculus II",
+                "name": "Praxass",
                 "description": "this second part of the introductory calculus sequence focuses on integral calculus beginning with the fundamental theorem of calculus, the connection between two seemingly unrelated problems: measuring changing quantities and finding areas of curved shapes. students will develop a deep understanding of the integral, and use it to: unpack equations involving derivatives; to make sense of infinite sums; to write complicated functions as 'infinite polynomials'; and to compute areas, volumes, and totals in applied problems. this course will further develop students' abilities to translate between algebraic, graphical, numerical, and verbal descriptions of mathematics in a variety of applied contexts. this course is a continuation of mat135h1 and will be useful for students interested in learning applied calculus in relation to future studies in economics, life science, and physical and mathematical science programs.",
                 "sessions": [
                     "20235F"
@@ -59,9 +59,51 @@ const test_data = {
                 "rank": 6
             },
             {
-                "code": "MAT136H1",
+                "code": "ESC190H1",
                 "sectionCode": "S",
-                "name": "Calculus II",
+                "name": "Fun times!",
+                "description": "this second part of the introductory calculus sequence focuses on integral calculus beginning with the fundamental theorem of calculus, the connection between two seemingly unrelated problems: measuring changing quantities and finding areas of curved shapes. students will develop a deep understanding of the integral, and use it to: unpack equations involving derivatives; to make sense of infinite sums; to write complicated functions as 'infinite polynomials'; and to compute areas, volumes, and totals in applied problems. this course will further develop students' abilities to translate between algebraic, graphical, numerical, and verbal descriptions of mathematics in a variety of applied contexts. this course is a continuation of mat135h1 and will be useful for students interested in learning applied calculus in relation to future studies in economics, life science, and physical and mathematical science programs.",
+                "sessions": [
+                    "20235S"
+                ],
+                "division": {
+                    "code": "ARTSC",
+                    "name": "Faculty of Arts and Science"
+                },
+                "rank": 6
+            },
+            {
+                "code": "ESC195H1",
+                "sectionCode": "S",
+                "name": "RIP",
+                "description": "this second part of the introductory calculus sequence focuses on integral calculus beginning with the fundamental theorem of calculus, the connection between two seemingly unrelated problems: measuring changing quantities and finding areas of curved shapes. students will develop a deep understanding of the integral, and use it to: unpack equations involving derivatives; to make sense of infinite sums; to write complicated functions as 'infinite polynomials'; and to compute areas, volumes, and totals in applied problems. this course will further develop students' abilities to translate between algebraic, graphical, numerical, and verbal descriptions of mathematics in a variety of applied contexts. this course is a continuation of mat135h1 and will be useful for students interested in learning applied calculus in relation to future studies in economics, life science, and physical and mathematical science programs.",
+                "sessions": [
+                    "20235S"
+                ],
+                "division": {
+                    "code": "ARTSC",
+                    "name": "Faculty of Arts and Science"
+                },
+                "rank": 6
+            },
+            {
+                "code": "MSE160H1",
+                "sectionCode": "S",
+                "name": "Yikes",
+                "description": "this second part of the introductory calculus sequence focuses on integral calculus beginning with the fundamental theorem of calculus, the connection between two seemingly unrelated problems: measuring changing quantities and finding areas of curved shapes. students will develop a deep understanding of the integral, and use it to: unpack equations involving derivatives; to make sense of infinite sums; to write complicated functions as 'infinite polynomials'; and to compute areas, volumes, and totals in applied problems. this course will further develop students' abilities to translate between algebraic, graphical, numerical, and verbal descriptions of mathematics in a variety of applied contexts. this course is a continuation of mat135h1 and will be useful for students interested in learning applied calculus in relation to future studies in economics, life science, and physical and mathematical science programs.",
+                "sessions": [
+                    "20235S"
+                ],
+                "division": {
+                    "code": "ARTSC",
+                    "name": "Faculty of Arts and Science"
+                },
+                "rank": 6
+            },
+            {
+                "code": "ECE159H1",
+                "sectionCode": "S",
+                "name": "Meh",
                 "description": "this second part of the introductory calculus sequence focuses on integral calculus beginning with the fundamental theorem of calculus, the connection between two seemingly unrelated problems: measuring changing quantities and finding areas of curved shapes. students will develop a deep understanding of the integral, and use it to: unpack equations involving derivatives; to make sense of infinite sums; to write complicated functions as 'infinite polynomials'; and to compute areas, volumes, and totals in applied problems. this course will further develop students' abilities to translate between algebraic, graphical, numerical, and verbal descriptions of mathematics in a variety of applied contexts. this course is a continuation of mat135h1 and will be useful for students interested in learning applied calculus in relation to future studies in economics, life science, and physical and mathematical science programs.",
                 "sessions": [
                     "20235S"
