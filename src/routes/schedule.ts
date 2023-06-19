@@ -159,7 +159,7 @@ export function schedule(courses: Course[], optimizer: Function) {
 
         for (let section of otherSections) {
             let newSchedule = new Map(_schedule)
-            newSchedule.set(_courses[0].code, section.id)
+            newSchedule.get(section.code)!.set(section.type, section.id);
             
             if (optimizerCache.has(newSchedule.toString())) {
                 continue
