@@ -108,6 +108,8 @@
       optimizationFunctions.push(daysOffOptimizer);
     }
 
+    console.log(scheduleCourses);
+
     let newSchedule: Schedule = schedule(
       scheduleCourses,
       chainOptimizers(optimizationFunctions)

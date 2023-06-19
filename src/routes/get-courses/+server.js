@@ -9,7 +9,9 @@ export async function POST({ request }) {
     };
 
     if (dev) {
-        return new Response(JSON.stringify(test_data), init);
+        return new Response(JSON.stringify({payload: test_data.payload.sort((a,b)=>
+            Math.random() - 0.5
+        )}), init);
     }
 
     var myHeaders = new Headers();
