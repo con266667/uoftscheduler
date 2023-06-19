@@ -117,45 +117,53 @@ export function chainOptimizers(optimizers: Function[]) {
     }
 }
 
-function trySchedule(courses: Course[], optimizer: Function) {
+function randomSchedule(courses: Course[], schedule: Schedule | undefined): [Schedule, Section[]] {
     let _schedule: Schedule = new Map()
-    let _courses = courses.slice()
 
-    for (let course of _courses) {
-        _schedule.set(course.code, new Map())
-        for (let section_type in course.sections) {
-            // @ts-ignore
-            if (course.sections[section_type].length > 0) {
+    if (schedule) {
+        _schedule = new Map(schedule)
+    } else {
+        for (let course of courses) {
+            _schedule.set(course.code, new Map())
+            for (let section_type in course.sections) {
                 // @ts-ignore
-                _schedule.get(course.code)!.set(section_type, course.sections[section_type][
+                if (course.sections[section_type].length > 0) {
                     // @ts-ignore
-                    Math.floor(Math.random() * course.sections[section_type].length)
-                ].id)
-            } else {
-                _schedule.get(course.code)!.set(section_type, "")
+                    _schedule.get(course.code)!.set(section_type, course.sections[section_type][
+                        // @ts-ignore
+                        Math.floor(Math.random() * course.sections[section_type].length)
+                    ].id)
+                } else {
+                    _schedule.get(course.code)!.set(section_type, "")
+                }
             }
         }
     }
 
     let otherSections = []
-    for (let i = 0; i < _courses.length; i++) {
-        for (let [section_type, sections] of Object.entries(_courses[i].sections)) {
+    for (let i = 0; i < courses.length; i++) {
+        for (let [section_type, sections] of Object.entries(courses[i].sections)) {
             for (let section of sections) {
-                if (section.id !== _schedule.get(_courses[i].code)?.get(section_type)) {
+                if (section.id !== _schedule.get(courses[i].code)?.get(section_type)) {
                     otherSections.push(section)
                 }
             }
         }
     }
 
-    let bestCost = optimizer(_courses, _schedule);
+    return [_schedule, otherSections]
+}
+
+function trySchedule(courses: Course[], optimizer: Function, schedule: Schedule | undefined): [Schedule, number] {
+    let [_schedule, otherSections] = randomSchedule(courses, schedule);
+    let bestCost = optimizer(courses, _schedule);
     let iters = 0
 
     let optimizerCache = new Map()
     let currentSchedule = new Map(_schedule);
     let currentCost = bestCost;
 
-    while (iters < 1000 && otherSections.length > 0) {
+    while (iters < 50 && otherSections.length > 0) {
         iters++;
 
         let randomSection = otherSections[Math.floor(Math.random() * otherSections.length)]
@@ -164,7 +172,7 @@ function trySchedule(courses: Course[], optimizer: Function) {
         if (optimizerCache.has(currentSchedule.toString())) {
             currentCost = optimizerCache.get(currentSchedule.toString())
         } else {
-            currentCost = optimizer(_courses, currentSchedule)
+            currentCost = optimizer(courses, currentSchedule)
             optimizerCache.set(currentSchedule.toString(), currentCost);
         }
         
@@ -172,10 +180,10 @@ function trySchedule(courses: Course[], optimizer: Function) {
             _schedule = new Map(currentSchedule);
             bestCost = currentCost;
             otherSections = []
-            for (let i = 0; i < _courses.length; i++) {
-                for (let [section_type, sections] of Object.entries(_courses[i].sections)) {
+            for (let i = 0; i < courses.length; i++) {
+                for (let [section_type, sections] of Object.entries(courses[i].sections)) {
                     for (let section of sections) {
-                        if (section.id !== _schedule.get(_courses[i].code)?.get(section_type)) {
+                        if (section.id !== _schedule.get(courses[i].code)?.get(section_type)) {
                             otherSections.push(section)
                         }
                     }
@@ -184,22 +192,25 @@ function trySchedule(courses: Course[], optimizer: Function) {
         }
     }
 
-    console.log(bestCost)
-    return _schedule
+    return [_schedule, bestCost]
 }
 
 export function schedule(courses: Course[], optimizer: Function) {
-    let bestCost = Infinity;
-    let _schedule: Schedule = new Map()
+    let schedules: any[] = []
 
-    for (let i = 0; i < 20; i++) {
-        let newSchedule = trySchedule(courses, optimizer)
-        let cost = optimizer(courses, newSchedule)
-        if (cost < bestCost) {
-            _schedule = newSchedule
-            bestCost = cost
+    for (let i = 0; i < 30; i++) {
+        // 30 generations
+        for (let j = 0; j < 30; j++) {
+            // 30 individuals per generation
+            if (schedules.length === 0) {
+                schedules.push(trySchedule(courses, optimizer, undefined))
+            } else {
+                schedules.push(trySchedule(courses, optimizer, schedules.find(schedule => schedule[1] === Math.min(...schedules.map(schedule => schedule[1])))?.[0]))
+            }
         }
     }
 
-    return _schedule
+    console.log(schedules.find(schedule => schedule[1] === Math.min(...schedules.map(schedule => schedule[1]))))
+    
+    return schedules[0][0]
 }
