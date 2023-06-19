@@ -154,16 +154,15 @@ function randomSchedule(courses: Course[], schedule: Schedule | undefined): [Sch
     return [_schedule, otherSections]
 }
 
-function trySchedule(courses: Course[], optimizer: Function, schedule: Schedule | undefined): [Schedule, number] {
+function trySchedule(courses: Course[], optimizer: Function, optimizerCache: Map<string, number>, schedule: Schedule | undefined): [Schedule, number] {
     let [_schedule, otherSections] = randomSchedule(courses, schedule);
     let bestCost = optimizer(courses, _schedule);
     let iters = 0
 
-    let optimizerCache = new Map()
     let currentSchedule = new Map(_schedule);
     let currentCost = bestCost;
 
-    while (iters < 10 && otherSections.length > 0) {
+    while (iters < 30 && otherSections.length > 0) {
         iters++;
 
         let randomSection = otherSections[Math.floor(Math.random() * otherSections.length)]
@@ -197,20 +196,21 @@ function trySchedule(courses: Course[], optimizer: Function, schedule: Schedule 
 
 export function schedule(courses: Course[], optimizer: Function) {
     let schedules: any[] = []
+    let optimizerCache = new Map()
+    let bestSchedule: [Schedule, number] | undefined = undefined
 
-    for (let i = 0; i < 40; i++) {
-        // 30 generations
-        for (let j = 0; j < 10; j++) {
-            // 30 individuals per generation
+    for (let i = 0; i < 400; i++) { // Generations
+        for (let j = 0; j < 10; j++) { // Population
             if (schedules.length === 0) {
-                schedules.push(trySchedule(courses, optimizer, undefined))
+                schedules.push(trySchedule(courses, optimizer, optimizerCache, undefined))
             } else {
-                schedules.push(trySchedule(courses, optimizer, schedules.find(schedule => schedule[1] === Math.min(...schedules.map(schedule => schedule[1])))?.[0]))
+                schedules.push(trySchedule(courses, optimizer, optimizerCache, bestSchedule?.[0]))
             }
+            bestSchedule = schedules.find(schedule => schedule[1] === Math.min(...schedules.map(schedule => schedule[1])))
         }
     }
 
-    console.log(schedules.find(schedule => schedule[1] === Math.min(...schedules.map(schedule => schedule[1]))))
+    console.log(bestSchedule)
     
-    return schedules.find(schedule => schedule[1] === Math.min(...schedules.map(schedule => schedule[1])))?.[0]
+    return bestSchedule?.[0]
 }
