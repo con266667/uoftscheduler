@@ -2,9 +2,9 @@
   import { onMount } from "svelte";
   import { Division, Sessions } from "./values";
   import Courses from "./courses.svelte";
-  import { writable } from "svelte/store";
+  import { get, writable } from "svelte/store";
   import Timetable from "./timetable.svelte";
-  import { selectedCourses, selectedOptimizations } from "../stores";
+  import { courses, selectedCourses, selectedOptimizations } from "../stores";
   import CourseTile from "../components/course_tile.svelte";
 
   let selectedSession: typeof Sessions.Fall2023 = Sessions.Fall2023;
@@ -62,6 +62,25 @@
     return await res.json();
   }
 
+  async function getCourse(courseAndTitle: any) {
+    let res = await fetch("/get-courses", {
+      method: "POST",
+      body: JSON.stringify({
+        courseCodeAndTitleProps: {
+          courseCode: courseAndTitle.code,
+          courseTitle: courseAndTitle.title,
+        },
+      }),
+    });
+    let data = await res.json();
+    courses.update((c) => {
+      c[courseAndTitle.code] = data.payload[0];
+      return c;
+    });
+    console.log($courses);
+    return data.payload[0];
+  }
+
   async function searchCourses(searchTerm: string) {
     console.log(searchTerm);
     if (searchTerm == "") {
@@ -98,6 +117,15 @@
   function viewCourses() {
     viewingCourses = true;
     history.pushState({}, "", "?page=courses");
+  }
+
+  $: getCoursesForSelected($selectedCourses);
+  function getCoursesForSelected(selectedCourses: any[]) {
+    for (let course of selectedCourses) {
+      if (!(course.code in $courses)) {
+        getCourse(course);
+      }
+    }
   }
 
   onMount(async () => {
@@ -180,9 +208,10 @@
       <CourseTile
         {course}
         enabled={true}
-        added={$selectedCourses.includes(course)}
+        added={$selectedCourses.find((c) => c.code == course.code) != undefined}
         on:click={() => {
           selectedCourses.update((courses) => [...courses, course]);
+          getCourse(course);
         }}
       />
     {/each}

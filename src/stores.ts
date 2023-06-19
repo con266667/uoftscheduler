@@ -29,3 +29,5 @@ selectedOptimizations.update((sessions) => {
     }
     return sessions;
 });
+
+export let courses: Writable<Record<string, any>> = writable({});

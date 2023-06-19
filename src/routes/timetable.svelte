@@ -10,6 +10,7 @@
     averageEndTimeOptimizer,
     chainOptimizers,
   } from "./schedule";
+  import { courses } from "../stores";
 
   export let viewingTimetable: boolean;
   export let selectedCourses: Writable<any[]>;
@@ -63,7 +64,11 @@
       (course, index, self) =>
         index === self.findIndex((c) => c.code === course.code)
     );
-    for (let course of $selectedCourses) {
+    for (let selectedCourse of $selectedCourses) {
+      console.log(selectedCourse);
+      let course = $courses[selectedCourse.code];
+      console.log($courses);
+      console.log(course);
       let sections: {
         id: string;
         events: Event[];
@@ -132,7 +137,8 @@
 
   function buildTimetable() {
     timetable = [];
-    for (let course of $selectedCourses) {
+    for (let selectedCourse of $selectedCourses) {
+      let course = $courses[selectedCourse.code];
       let events = getTimes(course);
       timetable = [...timetable, ...events];
     }
