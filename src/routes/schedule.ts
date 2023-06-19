@@ -77,14 +77,18 @@ function allEvents(courses: Course[], schedule: Schedule) {
 
 function numberOfConflicts(events: Event[]) {
     let conflicts = 0
+    let sortedEvents = events.sort((a, b) => a.startTime - b.startTime); // Sort by start time in ascending order
+
     for (let day = 1; day <= 5; day++) {
-        let eventsOnDay = events.filter(event => event.day === day)
-        for (let i = 0; i < eventsOnDay.length; i++) {
-            for (let j = i + 1; j < eventsOnDay.length; j++) {
-                if (eventsOnDay[i].endTime > eventsOnDay[j].startTime) {
-                    if (eventsOnDay[i].startTime < eventsOnDay[j].endTime) {
-                        conflicts++
-                    }
+        let eventsOnDay = sortedEvents.filter(event => event.day === day)
+
+        for (let i = 0; i < eventsOnDay.length - 1; i++) {
+            var done = false
+            while (!done) {
+                if (eventsOnDay[i].endTime > eventsOnDay[i + 1].startTime) {
+                    conflicts++
+                } else {
+                    done = true
                 }
             }
         }
@@ -165,6 +169,7 @@ function trySchedule(courses: Course[], optimizer: Function, optimizerCache: Map
     while (iters < 10 && otherSections.length > 0) {
         iters++;
 
+        const start = performance.now();
         let randomSection = otherSections[Math.floor(Math.random() * otherSections.length)]
         currentSchedule.get(randomSection.code)!.set(randomSection.type, randomSection.id);
 
@@ -174,7 +179,7 @@ function trySchedule(courses: Course[], optimizer: Function, optimizerCache: Map
             currentCost = optimizer(courses, currentSchedule)
             optimizerCache.set(currentSchedule.toString(), currentCost);
         }
-        
+
         if (currentCost < bestCost) {
             _schedule = new Map(currentSchedule);
             bestCost = currentCost;
@@ -202,11 +207,13 @@ export function schedule(courses: Course[], optimizer: Function) {
     for (let i = 0; i < 200; i++) { // Generations
         for (let j = 0; j < 5; j++) { // Population
             if (schedules.length === 0) {
-                schedules.push(trySchedule(courses, optimizer, optimizerCache, undefined))
+                let [_schedule, _] = randomSchedule(courses, undefined)
+                schedules.push([_schedule, optimizer(courses, _schedule)])
             } else {
                 schedules.push(trySchedule(courses, optimizer, optimizerCache, bestSchedule?.[0]))
             }
             bestSchedule = schedules.find(schedule => schedule[1] === Math.min(...schedules.map(schedule => schedule[1])))
+            schedules = []
         }
     }
 
