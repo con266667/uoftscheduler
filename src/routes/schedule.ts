@@ -218,11 +218,8 @@ export function schedule(courses: Course[], optimizer: Function) {
         }
     }
 
-    // console.log(bestSchedule?.[1])
-    console.log(numberOfConflicts(allEvents(courses, bestSchedule?.[0]!)));
-    
-    console.log(courses)
-    console.log(bestSchedule?.[0])
+    console.log(bestSchedule?.[1])
+    console.log(numberOfConflicts(allEvents(courses, bestSchedule?.[0]!)) + " conflicts");
     // console.log(allEvents(courses, bestSchedule?.[0]!))
 
     return bestSchedule?.[0]
