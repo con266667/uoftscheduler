@@ -86,7 +86,6 @@ function numberOfConflicts(events: Event[]) {
         for (let i = 0; i < eventsOnDay.length; i++) {
             for (let j = i + 1; j < eventsOnDay.length; j++) {
                 if (eventsOnDay[i].endTime > eventsOnDay[j].startTime) {
-                    console.log(eventsOnDay[i], eventsOnDay[j])
                     conflicts++;
                 } else {
                     break;
