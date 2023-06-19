@@ -9,6 +9,7 @@
     averageStartTimeOptimizer,
     averageEndTimeOptimizer,
     chainOptimizers,
+    type Section,
   } from "./schedule";
   import { courses } from "../stores";
 
@@ -47,19 +48,31 @@
     return times;
   }
 
+  function sectionType(id: string) {
+    if (id.includes("LEC")) {
+      return "lecture";
+    } else if (id.includes("TUT")) {
+      return "tutorial";
+    } else if (id.includes("PRA")) {
+      return "lab";
+    }
+  }
+
   function callScheduler() {
     let scheduleCourses: Course[] = [];
 
     for (let selectedCourse of $selectedCourses) {
       let course = $courses[selectedCourse.code];
-      let sections: {
-        id: string;
-        events: Event[];
-      }[] = [];
+      let schedule_course: Course = {
+        code: course.code,
+        sections: {
+          lecture: [],
+          tutorial: [],
+          lab: [],
+        },
+      };
+
       for (let section of course.sections) {
-        if (!section.name.includes("LEC")) {
-          continue;
-        }
         let events: Event[] = [];
         for (let meetingTime of section.meetingTimes) {
           events.push({
@@ -68,15 +81,16 @@
             endTime: meetingTime.end.millisofday,
           });
         }
-        sections.push({
+        schedule_course.sections[sectionType(section.name)!].push({
+          code: course.code,
+          type: sectionType(section.name)!,
           id: section.name,
           events: events,
         });
       }
-      scheduleCourses.push({
-        code: course.code,
-        sections: sections,
-      });
+
+      console.log(schedule_course);
+      scheduleCourses.push(schedule_course);
     }
 
     let optimizationFunctions = [];
@@ -99,18 +113,25 @@
       chainOptimizers(optimizationFunctions)
     );
 
-    timetable = timetable
-      .filter((e) => e.section == newSchedule.get(e.course.code))
-      .filter(
-        (e, i, a) =>
-          a.findIndex(
-            (e2) =>
-              e2.course.code == e.course.code &&
-              e2.day == e.day &&
-              e2.startTime == e.startTime &&
-              e2.endTime == e.endTime
-          ) == i
-      );
+    console.log(newSchedule);
+
+    // timetable = [];
+
+    timetable = timetable.filter(
+      (e) =>
+        newSchedule.get(e.course.code)?.get(sectionType(e.section)!) ==
+        e.section
+    );
+    // .filter(
+    //   (e, i, a) =>
+    //     a.findIndex(
+    //       (e2) =>
+    //         e2.course.code == e.course.code &&
+    //         e2.day == e.day &&
+    //         e2.startTime == e.startTime &&
+    //         e2.endTime == e.endTime
+    //     ) == i
+    // );
 
     currentlySelectedTimetableCourses = [...$selectedCourses];
     currentlySelectedTimetableOptimizations = [...selectedOptimizations];
@@ -175,7 +196,7 @@
           .filter((e) => e.day == currentDay + 1)
           .filter((e) => startMillisToIndex(e.startTime) == index) as event}
           <div class="event">
-            <h3>{event.course.name}</h3>
+            <h3>{event.course.name} {event.section}</h3>
             <h3>{event.course.code}</h3>
           </div>
         {/each}

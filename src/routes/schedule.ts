@@ -7,12 +7,20 @@ export type Event = {
 export type Course = {
     code: string,
     sections: {
-        id: string,
-        events: Event[]
-    }[]
+        lab: Section[],
+        lecture: Section[],
+        tutorial: Section[],
+    }
+};
+
+export type Section = {
+    code: string,
+    id: string,
+    type: string,
+    events: Event[]
 }
 
-export type Schedule = Map<string, string>
+export type Schedule = Map<string, Map<string, string>>
 
 function averageStartTime(events: Event[]) {
     let sum = 0
@@ -57,9 +65,11 @@ function daysOff(events: Event[]) {
 function allEvents(courses: Course[], schedule: Schedule) {
     let events: Event[] = []
     for (let course of courses) {
-        let session = course.sections.find(session => session.id === schedule.get(course.code))
-        if (session) {
-            events = events.concat(session.events)
+        for (let [section_type, sections] of Object.entries(course.sections)) {
+            let section: Section|undefined = sections.find(section => section.id === schedule.get(course.code)?.get(section_type));
+            if (section) {
+                events = events.concat(section.events)
+            }
         }
     }
     return events
@@ -113,55 +123,67 @@ export function schedule(courses: Course[], optimizer: Function) {
     let _courses = courses.slice()
 
     for (let course of _courses) {
-        if (course.sections.length > 0) _schedule.set(course.code, course.sections[0].id)
+        _schedule.set(course.code, new Map())
+        for (let section_type in course.sections) {
+            // @ts-ignore
+            if (course.sections[section_type].length > 0) {
+                // @ts-ignore
+                _schedule.get(course.code)!.set(section_type, course.sections[section_type][0].id)
+            } else {
+                _schedule.get(course.code)!.set(section_type, "")
+            }
+        }
     }
 
-    let otherSessions = []
+    let otherSections = []
     for (let i = 0; i < _courses.length; i++) {
-       for (let session of _courses[i].sections) {
-           if (session.id !== _schedule.get(_courses[i].code)) {
-                otherSessions.push(session)
-           }
-       }
+        for (let [section_type, sections] of Object.entries(_courses[i].sections)) {
+            for (let section of sections) {
+                if (section.id !== _schedule.get(_courses[i].code)?.get(section_type)) {
+                    otherSections.push(section)
+                }
+            }
+        }
     }
-
 
     let bestCost = optimizer(_courses, _schedule);
     let iters = 0
 
     let optimizerCache = new Map()
 
-    while (iters < Math.sqrt(otherSessions.length)*10000 && otherSessions.length > 0) {
+    while (iters < Math.sqrt(otherSections.length)*10000 && otherSections.length > 0) {
         iters++;
 
-        let currentBestCost;
-        let currentBestSessionId;
+        let currentBestCost: number|undefined;
+        let currentBestSection: Section|undefined;
 
-        for (let session of otherSessions) {
+        for (let section of otherSections) {
             let newSchedule = new Map(_schedule)
-            newSchedule.set(_courses[0].code, session.id)
+            newSchedule.set(_courses[0].code, section.id)
             
             if (optimizerCache.has(newSchedule.toString())) {
                 continue
             } else  {
                 if (currentBestCost === undefined) {
                     currentBestCost = optimizer(_courses, newSchedule);
-                    currentBestSessionId = session.id;
+                    currentBestSection = section
                 }
                 optimizerCache.set(newSchedule.toString(), currentBestCost)
             }
         }       
         
-        if (currentBestCost < bestCost) {
+        if (currentBestCost! < bestCost) {
             _schedule = new Map(_schedule)
-            _schedule.set(_courses[0].code, currentBestSessionId!)
+            _schedule.get(currentBestSection!.code)!.set(currentBestSection!.type, currentBestSection!.id);
             bestCost = currentBestCost
-            otherSessions = []
+            otherSections = []
             for (let i = 0; i < _courses.length; i++) {
-                for (let session of _courses[i].sections) {
-                     if (session.id !== _schedule.get(_courses[i].code)) {
-                            otherSessions.push(session)
-                     }
+                for (let [section_type, sections] of Object.entries(_courses[i].sections)) {
+                    for (let section of sections) {
+                        if (section.id !== _schedule.get(_courses[i].code)?.get(section_type)) {
+                            otherSections.push(section)
+                        }
+                    }
                 }
             }
         }
