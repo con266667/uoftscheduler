@@ -163,7 +163,7 @@ function trySchedule(courses: Course[], optimizer: Function, schedule: Schedule 
     let currentSchedule = new Map(_schedule);
     let currentCost = bestCost;
 
-    while (iters < 50 && otherSections.length > 0) {
+    while (iters < 10 && otherSections.length > 0) {
         iters++;
 
         let randomSection = otherSections[Math.floor(Math.random() * otherSections.length)]
@@ -198,9 +198,9 @@ function trySchedule(courses: Course[], optimizer: Function, schedule: Schedule 
 export function schedule(courses: Course[], optimizer: Function) {
     let schedules: any[] = []
 
-    for (let i = 0; i < 30; i++) {
+    for (let i = 0; i < 10; i++) {
         // 30 generations
-        for (let j = 0; j < 30; j++) {
+        for (let j = 0; j < 10; j++) {
             // 30 individuals per generation
             if (schedules.length === 0) {
                 schedules.push(trySchedule(courses, optimizer, undefined))
@@ -210,7 +210,7 @@ export function schedule(courses: Course[], optimizer: Function) {
         }
     }
 
-    console.log(schedules.find(schedule => schedule[1] === Math.min(...schedules.map(schedule => schedule[1]))))
+    // console.log(schedules.find(schedule => schedule[1] === Math.min(...schedules.map(schedule => schedule[1]))))
     
-    return schedules[0][0]
+    return schedules.find(schedule => schedule[1] === Math.min(...schedules.map(schedule => schedule[1])))?.[0]
 }
