@@ -199,8 +199,8 @@ export function schedule(courses: Course[], optimizer: Function) {
     let optimizerCache = new Map()
     let bestSchedule: [Schedule, number] | undefined = undefined
 
-    for (let i = 0; i < 400; i++) { // Generations
-        for (let j = 0; j < 10; j++) { // Population
+    for (let i = 0; i < 40; i++) { // Generations
+        for (let j = 0; j < 5; j++) { // Population
             if (schedules.length === 0) {
                 schedules.push(trySchedule(courses, optimizer, optimizerCache, undefined))
             } else {
