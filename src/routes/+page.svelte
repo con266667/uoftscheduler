@@ -73,7 +73,7 @@
     let params = new URLSearchParams();
     params.append("term", searchTerm);
     for (let division of divisions) {
-      params.append("divisions", division.name);
+      params.append("divisions", division.value);
     }
 
     params.append("sessions", selectedSession.id);

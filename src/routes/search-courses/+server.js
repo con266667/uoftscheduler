@@ -17,6 +17,9 @@ export async function GET({ url }) {
     myHeaders.append("Accept", "application/json, text/plain, */*");
     myHeaders.append("Content-Type", "application/json");
 
+    params.set("upperThreshold", "200");
+    params.set("lowerThreshold", "50");
+
     var requestOptions = {
         method: 'GET',
         headers: myHeaders,
