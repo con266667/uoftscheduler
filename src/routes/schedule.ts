@@ -1,5 +1,3 @@
-import { randomInt } from 'crypto';
-
 export type Event = {
     day: number,
     startTime: number,
@@ -100,10 +98,8 @@ export function averageStartTimeOptimizer(courses: Course[], schedule: Schedule)
 }
 
 export function daysOffOptimizer(courses: Course[], schedule: Schedule) {
-    let start = process.hrtime.bigint();
     let events = allEvents(courses, schedule)
     let cost = 5 - daysOff(events) + (numberOfConflicts(events) * 100)
-    let end = process.hrtime.bigint();
     return cost
 }
 
@@ -123,7 +119,6 @@ export function chainOptimizers(optimizers: Function[]) {
 }
 
 function randomSchedule(courses: Course[], schedule: Schedule | undefined): [Schedule, Section[]] {
-    let start = process.hrtime.bigint();
     let _schedule: Schedule = new Map()
 
     if (schedule) {
@@ -157,14 +152,10 @@ function randomSchedule(courses: Course[], schedule: Schedule | undefined): [Sch
         }
     }
 
-    let end = process.hrtime.bigint();
     return [_schedule, otherSections]
 }
 
 function trySchedule(courses: Course[], optimizer: Function, optimizerCache: Map<string, number>, schedule: Schedule | undefined): [Schedule, number] {
-    let start = process.hrtime.bigint();
-    let setupStart = process.hrtime.bigint();
-
     let [_schedule, otherSections] = randomSchedule(courses, schedule);
     let bestCost = 0;
     if (optimizerCache.has(_schedule.toString())) {
@@ -178,8 +169,6 @@ function trySchedule(courses: Course[], optimizer: Function, optimizerCache: Map
     let currentSchedule = new Map(_schedule);
     let currentCost = bestCost;
 
-    let setupEnd = process.hrtime.bigint();
-    let exploreStart = process.hrtime.bigint();
     while (iters < 100 && otherSections.length > 0) {
         iters++;
 
@@ -208,9 +197,7 @@ function trySchedule(courses: Course[], optimizer: Function, optimizerCache: Map
             }
         }
     }
-    let exploreEnd = process.hrtime.bigint();
 
-    let end = process.hrtime.bigint();
     return [_schedule, bestCost]
 }
 
@@ -237,247 +224,245 @@ export function schedule(courses: Course[], optimizer: Function) {
         }
     }
 
-    if (bestSchedule?.[1] !== 205) {
-        console.log("Not optimal")
-    }
+    console.log(bestSchedule?.[1])
     
     return bestSchedule?.[0]
 }
 
 
-let testCourses = [
-    {
-        "code": "JRE300H1",
-        "sections": {
-            "lecture": [
-                {
-                    "code": "JRE300H1",
-                    "type": "lecture",
-                    "id": "LEC0101",
-                    "events": [
-                        {
-                            "id": "JRE300H1LEC0101",
-                            "day": 2,
-                            "startTime": 54000000,
-                            "endTime": 64800000
-                        },
-                        {
-                            "id": "JRE300H1LEC0101",
-                            "day": 4,
-                            "startTime": 54000000,
-                            "endTime": 64800000
-                        }
-                    ]
-                }
-            ],
-            "tutorial": [
-                {
-                    "code": "JRE300H1",
-                    "type": "tutorial",
-                    "id": "TUT0101",
-                    "events": [
-                        {
-                            "id": "JRE300H1TUT0101",
-                            "day": 5,
-                            "startTime": 64800000,
-                            "endTime": 72000000
-                        }
-                    ]
-                }
-            ],
-            "lab": []
-        }
-    },
-    {
-        "code": "MAT187H1",
-        "sections": {
-            "lecture": [
-                {
-                    "code": "MAT187H1",
-                    "type": "lecture",
-                    "id": "LEC0101",
-                    "events": [
-                        {
-                            "id": "MAT187H1LEC0101",
-                            "day": 2,
-                            "startTime": 50400000,
-                            "endTime": 57600000
-                        },
-                        {
-                            "id": "MAT187H1LEC0101",
-                            "day": 3,
-                            "startTime": 50400000,
-                            "endTime": 57600000
-                        },
-                        {
-                            "id": "MAT187H1LEC0101",
-                            "day": 5,
-                            "startTime": 32400000,
-                            "endTime": 39600000
-                        }
-                    ]
-                }
-            ],
-            "tutorial": [
-                {
-                    "code": "MAT187H1",
-                    "type": "tutorial",
-                    "id": "TUT0101",
-                    "events": [
-                        {
-                            "id": "MAT187H1TUT0101",
-                            "day": 3,
-                            "startTime": 57600000,
-                            "endTime": 64800000
-                        }
-                    ]
-                }
-            ],
-            "lab": []
-        }
-    },
-    {
-        "code": "MIE100H1",
-        "sections": {
-            "lecture": [
-                {
-                    "code": "MIE100H1",
-                    "type": "lecture",
-                    "id": "LEC0101",
-                    "events": [
-                        {
-                            "id": "MIE100H1LEC0101",
-                            "day": 2,
-                            "startTime": 57600000,
-                            "endTime": 64800000
-                        },
-                        {
-                            "id": "MIE100H1LEC0101",
-                            "day": 4,
-                            "startTime": 32400000,
-                            "endTime": 39600000
-                        },
-                        {
-                            "id": "MIE100H1LEC0101",
-                            "day": 5,
-                            "startTime": 39600000,
-                            "endTime": 46800000
-                        }
-                    ]
-                }
-            ],
-            "tutorial": [
-                {
-                    "code": "MIE100H1",
-                    "type": "tutorial",
-                    "id": "TUT0101",
-                    "events": [
-                        {
-                            "id": "MIE100H1TUT0101",
-                            "day": 5,
-                            "startTime": 57600000,
-                            "endTime": 64800000
-                        }
-                    ]
-                }
-            ],
-            "lab": []
-        }
-    },
-    {
-        "code": "APS112H1",
-        "sections": {
-            "lecture": [
-                {
-                    "code": "APS112H1",
-                    "type": "lecture",
-                    "id": "LEC0101",
-                    "events": [
-                        {
-                            "id": "APS112H1LEC0101",
-                            "day": 1,
-                            "startTime": 57600000,
-                            "endTime": 64800000
-                        },
-                        {
-                            "id": "APS112H1LEC0101",
-                            "day": 5,
-                            "startTime": 50400000,
-                            "endTime": 57600000
-                        }
-                    ]
-                }
-            ],
-            "tutorial": [
-                {
-                    "code": "APS112H1",
-                    "type": "tutorial",
-                    "id": "TUT0101",
-                    "events": [
-                        {
-                            "id": "APS112H1TUT0101",
-                            "day": 1,
-                            "startTime": 64800000,
-                            "endTime": 72000000
-                        },
-                        {
-                            "id": "APS112H1TUT0101",
-                            "day": 4,
-                            "startTime": 64800000,
-                            "endTime": 72000000
-                        }
-                    ]
-                }
-            ],
-            "lab": []
-        }
-    },
-    {
-        "code": "APS163H1",
-        "sections": {
-            "lecture": [
-                {
-                    "code": "APS163H1",
-                    "type": "lecture",
-                    "id": "LEC0101",
-                    "events": []
-                }
-            ],
-            "tutorial": [
-                {
-                    "code": "APS163H1",
-                    "type": "tutorial",
-                    "id": "TUT0101",
-                    "events": [
-                        {
-                            "id": "APS163H1TUT0101",
-                            "day": 3,
-                            "startTime": 64800000,
-                            "endTime": 72000000
-                        }
-                    ]
-                }
-            ],
-            "lab": []
-        }
-    }
-]
+// let testCourses = [
+//     {
+//         "code": "JRE300H1",
+//         "sections": {
+//             "lecture": [
+//                 {
+//                     "code": "JRE300H1",
+//                     "type": "lecture",
+//                     "id": "LEC0101",
+//                     "events": [
+//                         {
+//                             "id": "JRE300H1LEC0101",
+//                             "day": 2,
+//                             "startTime": 54000000,
+//                             "endTime": 64800000
+//                         },
+//                         {
+//                             "id": "JRE300H1LEC0101",
+//                             "day": 4,
+//                             "startTime": 54000000,
+//                             "endTime": 64800000
+//                         }
+//                     ]
+//                 }
+//             ],
+//             "tutorial": [
+//                 {
+//                     "code": "JRE300H1",
+//                     "type": "tutorial",
+//                     "id": "TUT0101",
+//                     "events": [
+//                         {
+//                             "id": "JRE300H1TUT0101",
+//                             "day": 5,
+//                             "startTime": 64800000,
+//                             "endTime": 72000000
+//                         }
+//                     ]
+//                 }
+//             ],
+//             "lab": []
+//         }
+//     },
+//     {
+//         "code": "MAT187H1",
+//         "sections": {
+//             "lecture": [
+//                 {
+//                     "code": "MAT187H1",
+//                     "type": "lecture",
+//                     "id": "LEC0101",
+//                     "events": [
+//                         {
+//                             "id": "MAT187H1LEC0101",
+//                             "day": 2,
+//                             "startTime": 50400000,
+//                             "endTime": 57600000
+//                         },
+//                         {
+//                             "id": "MAT187H1LEC0101",
+//                             "day": 3,
+//                             "startTime": 50400000,
+//                             "endTime": 57600000
+//                         },
+//                         {
+//                             "id": "MAT187H1LEC0101",
+//                             "day": 5,
+//                             "startTime": 32400000,
+//                             "endTime": 39600000
+//                         }
+//                     ]
+//                 }
+//             ],
+//             "tutorial": [
+//                 {
+//                     "code": "MAT187H1",
+//                     "type": "tutorial",
+//                     "id": "TUT0101",
+//                     "events": [
+//                         {
+//                             "id": "MAT187H1TUT0101",
+//                             "day": 3,
+//                             "startTime": 57600000,
+//                             "endTime": 64800000
+//                         }
+//                     ]
+//                 }
+//             ],
+//             "lab": []
+//         }
+//     },
+//     {
+//         "code": "MIE100H1",
+//         "sections": {
+//             "lecture": [
+//                 {
+//                     "code": "MIE100H1",
+//                     "type": "lecture",
+//                     "id": "LEC0101",
+//                     "events": [
+//                         {
+//                             "id": "MIE100H1LEC0101",
+//                             "day": 2,
+//                             "startTime": 57600000,
+//                             "endTime": 64800000
+//                         },
+//                         {
+//                             "id": "MIE100H1LEC0101",
+//                             "day": 4,
+//                             "startTime": 32400000,
+//                             "endTime": 39600000
+//                         },
+//                         {
+//                             "id": "MIE100H1LEC0101",
+//                             "day": 5,
+//                             "startTime": 39600000,
+//                             "endTime": 46800000
+//                         }
+//                     ]
+//                 }
+//             ],
+//             "tutorial": [
+//                 {
+//                     "code": "MIE100H1",
+//                     "type": "tutorial",
+//                     "id": "TUT0101",
+//                     "events": [
+//                         {
+//                             "id": "MIE100H1TUT0101",
+//                             "day": 5,
+//                             "startTime": 57600000,
+//                             "endTime": 64800000
+//                         }
+//                     ]
+//                 }
+//             ],
+//             "lab": []
+//         }
+//     },
+//     {
+//         "code": "APS112H1",
+//         "sections": {
+//             "lecture": [
+//                 {
+//                     "code": "APS112H1",
+//                     "type": "lecture",
+//                     "id": "LEC0101",
+//                     "events": [
+//                         {
+//                             "id": "APS112H1LEC0101",
+//                             "day": 1,
+//                             "startTime": 57600000,
+//                             "endTime": 64800000
+//                         },
+//                         {
+//                             "id": "APS112H1LEC0101",
+//                             "day": 5,
+//                             "startTime": 50400000,
+//                             "endTime": 57600000
+//                         }
+//                     ]
+//                 }
+//             ],
+//             "tutorial": [
+//                 {
+//                     "code": "APS112H1",
+//                     "type": "tutorial",
+//                     "id": "TUT0101",
+//                     "events": [
+//                         {
+//                             "id": "APS112H1TUT0101",
+//                             "day": 1,
+//                             "startTime": 64800000,
+//                             "endTime": 72000000
+//                         },
+//                         {
+//                             "id": "APS112H1TUT0101",
+//                             "day": 4,
+//                             "startTime": 64800000,
+//                             "endTime": 72000000
+//                         }
+//                     ]
+//                 }
+//             ],
+//             "lab": []
+//         }
+//     },
+//     {
+//         "code": "APS163H1",
+//         "sections": {
+//             "lecture": [
+//                 {
+//                     "code": "APS163H1",
+//                     "type": "lecture",
+//                     "id": "LEC0101",
+//                     "events": []
+//                 }
+//             ],
+//             "tutorial": [
+//                 {
+//                     "code": "APS163H1",
+//                     "type": "tutorial",
+//                     "id": "TUT0101",
+//                     "events": [
+//                         {
+//                             "id": "APS163H1TUT0101",
+//                             "day": 3,
+//                             "startTime": 64800000,
+//                             "endTime": 72000000
+//                         }
+//                     ]
+//                 }
+//             ],
+//             "lab": []
+//         }
+//     }
+// ]
 
-const testSchedule = new Map();
-testSchedule.set("JRE300H1", new Map([["lecture", "LEC0101"], ["tutorial", "TUT0101"], ["lab", ""]]));
-testSchedule.set("MAT187H1", new Map([["lecture", "LEC0101"], ["tutorial", "TUT0101"], ["lab", ""]]));
-testSchedule.set("MIE100H1", new Map([["lecture", "LEC0101"], ["tutorial", "TUT0101"], ["lab", ""]]));
-testSchedule.set("APS112H1", new Map([["lecture", "LEC0101"], ["tutorial", "TUT0101"], ["lab", ""]]));
-testSchedule.set("APS163H1", new Map([["lecture", "LEC0101"], ["tutorial", "TUT0101"], ["lab", ""]]));
+// const testSchedule = new Map();
+// testSchedule.set("JRE300H1", new Map([["lecture", "LEC0101"], ["tutorial", "TUT0101"], ["lab", ""]]));
+// testSchedule.set("MAT187H1", new Map([["lecture", "LEC0101"], ["tutorial", "TUT0101"], ["lab", ""]]));
+// testSchedule.set("MIE100H1", new Map([["lecture", "LEC0101"], ["tutorial", "TUT0101"], ["lab", ""]]));
+// testSchedule.set("APS112H1", new Map([["lecture", "LEC0101"], ["tutorial", "TUT0101"], ["lab", ""]]));
+// testSchedule.set("APS163H1", new Map([["lecture", "LEC0101"], ["tutorial", "TUT0101"], ["lab", ""]]));
 
-let times = [];
-for (let i = 0; i < 1000; i++) {
-    let start = process.hrtime.bigint();
-    schedule(testCourses, daysOffOptimizer);
-    let end = process.hrtime.bigint();
-    times.push(Number(end - start));
-}
+// let times = [];
+// for (let i = 0; i < 1000; i++) {
+//     let start = process.hrtime.bigint();
+//     schedule(testCourses, daysOffOptimizer);
+//     let end = process.hrtime.bigint();
+//     times.push(Number(end - start));
+// }
 
-let avg = times.reduce((a, b) => a + b) / times.length;
+// let avg = times.reduce((a, b) => a + b) / times.length;
 
-console.log(avg / 1000000);
+// console.log(avg / 1000000);

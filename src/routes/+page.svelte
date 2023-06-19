@@ -72,7 +72,6 @@
         },
       }),
     });
-    console.log(res);
     let data = await res.json();
     courses.update((c) => {
       c[courseAndTitle.code] = data.payload[0];
