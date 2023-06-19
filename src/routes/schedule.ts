@@ -83,7 +83,6 @@ function numberOfConflicts(events: Event[]) {
             for (let j = i + 1; j < eventsOnDay.length; j++) {
                 if (eventsOnDay[i].endTime > eventsOnDay[j].startTime) {
                     if (eventsOnDay[i].startTime < eventsOnDay[j].endTime) {
-                        if (i === j) continue
                         conflicts++
                     }
                 }
@@ -151,7 +150,7 @@ export function schedule(courses: Course[], optimizer: Function) {
 
     let optimizerCache = new Map()
 
-    while (iters < Math.sqrt(otherSections.length)*500 && otherSections.length > 0) {
+    while (iters < Math.sqrt(otherSections.length)*10000 && otherSections.length > 0) {
         iters++;
 
         let currentBestCost: number|undefined;
