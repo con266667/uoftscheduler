@@ -20,10 +20,9 @@ export async function GET({ url }) {
     var requestOptions = {
         method: 'GET',
         headers: myHeaders,
-        params: params,
     };
   
-    var response = await fetch("https://api.easi.utoronto.ca/ttb/getOptimizedMatchingCourseTitles", requestOptions)
+    var response = await fetch("https://api.easi.utoronto.ca/ttb/getOptimizedMatchingCourseTitles?" + params.toString, requestOptions)
     var json = JSON.stringify(await response.json());
     return new Response(json, init);
 }
