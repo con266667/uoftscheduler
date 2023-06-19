@@ -119,6 +119,11 @@
     history.pushState({}, "", "?page=courses");
   }
 
+  function viewTimetable() {
+    viewingTimetable = true;
+    history.pushState({}, "", "?page=timetable");
+  }
+
   $: getCoursesForSelected($selectedCourses);
   function getCoursesForSelected(selectedCourses: any[]) {
     for (let course of selectedCourses) {
@@ -241,7 +246,7 @@
   <button
     class="create"
     disabled={!($selectedCourses.length > 0)}
-    on:click={() => (viewingTimetable = true)}
+    on:click={viewTimetable}
     class:selected={$selectedCourses.length > 0}
   >
     CREATE
