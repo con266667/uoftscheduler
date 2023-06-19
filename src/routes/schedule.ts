@@ -152,34 +152,25 @@ function trySchedule(courses: Course[], optimizer: Function) {
     let iters = 0
 
     let optimizerCache = new Map()
+    let currentSchedule = new Map(_schedule);
+    let currentCost = bestCost;
 
-    while (iters < 100 && otherSections.length > 0) {
+    while (iters < 1000 && otherSections.length > 0) {
         iters++;
 
-        let currentBestCost = Infinity;
-        let currentBestSection: Section|undefined;
+        let randomSection = otherSections[Math.floor(Math.random() * otherSections.length)]
+        currentSchedule.get(randomSection.code)!.set(randomSection.type, randomSection.id);
 
-        for (let section of otherSections) {
-            let newSchedule = new Map(_schedule)
-            newSchedule.get(section.code)!.set(section.type, section.id);
-            
-            if (optimizerCache.has(newSchedule.toString())) {
-                continue
-            } else  {
-                let cost = optimizer(_courses, newSchedule);
-                if (cost < currentBestCost) {
-                    currentBestCost = cost
-                    currentBestSection = section
-                }
-
-                optimizerCache.set(newSchedule.toString(), currentBestCost)
-            }
-        }       
+        if (optimizerCache.has(currentSchedule.toString())) {
+            currentCost = optimizerCache.get(currentSchedule.toString())
+        } else {
+            currentCost = optimizer(_courses, currentSchedule)
+            optimizerCache.set(currentSchedule.toString(), currentCost);
+        }
         
-        if (currentBestCost! < bestCost) {
-            _schedule = new Map(_schedule)
-            _schedule.get(currentBestSection!.code)!.set(currentBestSection!.type, currentBestSection!.id);
-            bestCost = currentBestCost
+        if (currentCost < bestCost) {
+            _schedule = new Map(currentSchedule);
+            bestCost = currentCost;
             otherSections = []
             for (let i = 0; i < _courses.length; i++) {
                 for (let [section_type, sections] of Object.entries(_courses[i].sections)) {
@@ -201,7 +192,7 @@ export function schedule(courses: Course[], optimizer: Function) {
     let bestCost = Infinity;
     let _schedule: Schedule = new Map()
 
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 20; i++) {
         let newSchedule = trySchedule(courses, optimizer)
         let cost = optimizer(courses, newSchedule)
         if (cost < bestCost) {
