@@ -77,12 +77,10 @@
       c[courseAndTitle.code] = data.payload[0];
       return c;
     });
-    console.log($courses);
     return data.payload[0];
   }
 
   async function searchCourses(searchTerm: string) {
-    console.log(searchTerm);
     if (searchTerm == "") {
       return [];
     }
@@ -107,7 +105,6 @@
 
     let res = await fetch("/search-courses?" + params.toString());
     let data = await res.json();
-    console.log(data);
     cachedSearchResults[selectedSession.id][searchTerm] =
       data.payload.codesAndTitles;
   }
@@ -129,8 +126,6 @@
     if (selectedCourses.length == 0) {
       return;
     }
-
-    console.log(selectedCourses);
 
     for (let course of selectedCourses) {
       if (!(course.code in $courses)) {

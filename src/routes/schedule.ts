@@ -133,20 +133,29 @@ export function schedule(courses: Course[], optimizer: Function) {
 
     while (iters < Math.sqrt(otherSessions.length)*10000 && otherSessions.length > 0) {
         iters++;
-        let randomSession = otherSessions[Math.floor(Math.random() * otherSessions.length)]
-        let newSchedule = new Map(_schedule)
-        let newCost = 0;
-        newSchedule.set(_courses[0].code, randomSession.id)
-        if (optimizerCache.has(newSchedule.toString())) {
-            continue
-        } else {
-            newCost = optimizer(_courses, newSchedule)
-            console.log(newCost)
-            optimizerCache.set(newSchedule.toString(), newCost)
-        }
-        if (newCost < bestCost) {
-            _schedule = newSchedule
-            bestCost = newCost
+
+        let currentBestCost;
+        let currentBestSessionId;
+
+        for (let session of otherSessions) {
+            let newSchedule = new Map(_schedule)
+            newSchedule.set(_courses[0].code, session.id)
+            
+            if (optimizerCache.has(newSchedule.toString())) {
+                continue
+            } else  {
+                if (currentBestCost === undefined) {
+                    currentBestCost = optimizer(_courses, newSchedule);
+                    currentBestSessionId = session.id;
+                }
+                optimizerCache.set(newSchedule.toString(), currentBestCost)
+            }
+        }       
+        
+        if (currentBestCost < bestCost) {
+            _schedule = new Map(_schedule)
+            _schedule.set(_courses[0].code, currentBestSessionId!)
+            bestCost = currentBestCost
             otherSessions = []
             for (let i = 0; i < _courses.length; i++) {
                 for (let session of _courses[i].sections) {
@@ -156,11 +165,9 @@ export function schedule(courses: Course[], optimizer: Function) {
                 }
             }
         }
-        
     }
 
     console.log(bestCost)
-    console.log("Done!")
 
     return _schedule
 }

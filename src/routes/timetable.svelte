@@ -51,10 +51,7 @@
     let scheduleCourses: Course[] = [];
 
     for (let selectedCourse of $selectedCourses) {
-      console.log(selectedCourse);
       let course = $courses[selectedCourse.code];
-      console.log($courses);
-      console.log(course);
       let sections: {
         id: string;
         events: Event[];
@@ -87,7 +84,6 @@
       optimizationFunctions.push(daysOffOptimizer);
     }
     if (selectedOptimizations.includes("Late Start")) {
-      console.log("Late Start");
       optimizationFunctions.push(averageStartTimeOptimizer);
     }
     if (selectedOptimizations.includes("Early Finish")) {
@@ -98,14 +94,10 @@
       optimizationFunctions.push(daysOffOptimizer);
     }
 
-    console.log("about to schedule");
-
     let newSchedule: Schedule = schedule(
       scheduleCourses,
       chainOptimizers(optimizationFunctions)
     );
-
-    console.log("scheduled");
 
     timetable = timetable
       .filter((e) => e.section == newSchedule.get(e.course.code))
