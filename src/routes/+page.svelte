@@ -78,12 +78,12 @@
 
     params.append("sessions", selectedSession.id);
 
-    fetch("/search-courses?" + params.toString())
-      .then((res) => res.json())
-      .then((data) => {
-        console.log(data);
-        cachedSearchResults[searchTerm] = data.payload.codesAndTitles;
-      });
+    console.log(params.toString());
+
+    let res = await fetch("/search-courses?" + params.toString());
+    let data = await res.json();
+    console.log(data);
+    cachedSearchResults[searchTerm] = data.payload.codesAndTitles;
   }
 
   $: searchCourses(searchTerm);
