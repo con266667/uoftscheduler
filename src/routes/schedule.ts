@@ -162,7 +162,7 @@ function trySchedule(courses: Course[], optimizer: Function, optimizerCache: Map
     let currentSchedule = new Map(_schedule);
     let currentCost = bestCost;
 
-    while (iters < 20 && otherSections.length > 0) {
+    while (iters < 10 && otherSections.length > 0) {
         iters++;
 
         let randomSection = otherSections[Math.floor(Math.random() * otherSections.length)]
@@ -199,7 +199,7 @@ export function schedule(courses: Course[], optimizer: Function) {
     let optimizerCache = new Map()
     let bestSchedule: [Schedule, number] | undefined = undefined
 
-    for (let i = 0; i < 80; i++) { // Generations
+    for (let i = 0; i < 200; i++) { // Generations
         for (let j = 0; j < 5; j++) { // Population
             if (schedules.length === 0) {
                 schedules.push(trySchedule(courses, optimizer, optimizerCache, undefined))
